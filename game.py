@@ -55,12 +55,15 @@ class Game:
         if amount != 1:
             dir = self.get_direction(op[1:])
         if amount == 1 or (dir != op[0] and dir + 1 != op[0]):  # 单个走或者平移
-            for i in range(amount):
-                if b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] == 1:
-                    b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] = player
-                    b[op[i * 2 + 1]][op[i * 2 + 2]] = 1
-                else:
-                    raise CannotGo
+            try:
+                for i in range(amount):
+                    if b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] == 1:
+                        b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] = player
+                        b[op[i * 2 + 1]][op[i * 2 + 2]] = 1
+                    else:
+                        raise CannotGo
+            except IndexError:
+                raise CannotGo
         else:  # 推
             if dx == 1:
                 xm = max(*[op[i*2+1] for i in range(amount)])
@@ -88,13 +91,13 @@ class Game:
             else:
                 if enemy_amount >= amount:
                     raise CannotPush
-                if enemy_amount > 0:
+                elif b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == player:
+                    raise CannotPush
+                elif enemy_amount > 0:
                     if b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == 1:
                         b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] = 2 if player == 3 else 3
                     elif b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == 0:
                         self.dead.append(2 if player == 3 else 3)
-                    else:
-                        raise CannotPush
             b[xm + dx][xm + dy] = player
             b[xm - (amount - 1) * dx][xm - (amount - 1) * dy] = 1
         self.commit(b)
@@ -119,17 +122,23 @@ class Game:
     def commit(self, b):
         self.board = b
 
-    def validate(self, op):
-        """验证合法性，主要是1.棋子都是己方的，2.棋子都在一条线上且挨着"""
-        if ...:
+    def validate(self, player, op):
+        """验证合法性，主要是1.棋子都是己方的，数量小于4 2.棋子都在一条线上且挨着"""
+        amount = len(op) // 2
+        pairs = [(op[i * 2 + 1], op[i * 2 + 2]) for i in range(amount)]
+        pairs.sort()
+        if not len(op) in (3, 5, 7):
             raise InvalidOperation
-        else:
-            try:
-                return self.operate(2, op)
-            except IndexError:
-                return "走出棋盘了"
-            except CannotGo:
-                return "棋盘位置有棋子且无法推动"
+        elif len(op) > 3:
+            dx = pairs[0][0] - pairs[1][0]
+            dy = pairs[0][1] - pairs[1][1]
+            for i in range(len(pairs)-2):
+                if pairs[i+1][0] - pairs[i+2][0] != dx or pairs[i+1][1] - pairs[i+1][1] != dy:
+                    raise InvalidOperation
+        for i in pairs:
+            if self.board[i[0]][i[1]] != player:
+                raise InvalidOperation
+        return self.operate(player, op)
 
     def judge(self):
         """返回2是黑棋输了，返回3是白棋输了，返回1是没有结束"""
@@ -141,10 +150,7 @@ class Game:
             return 1
 
 
-# 从上到下
-
-
 if __name__ == '__main__':
     g = Game()
-    g.operate(2, (5,7,8,7, 7))
+    g.validate(2, (5, 6, 4, 6, 3))
     print(g.board)
