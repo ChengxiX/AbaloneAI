@@ -21,12 +21,10 @@ tuple 操作:
 """
 
 
-class InvalidOperation(Exception):
-    pass
-
-
-class CannotPush(InvalidOperation):
-    pass
+class InvalidOperation(Exception): pass
+class CannotGo(InvalidOperation): pass  # 到边界
+class CannotPush(InvalidOperation): pass  # 推不动
+class InvalidDirection(InvalidOperation): pass
 
 
 class Game:
@@ -40,36 +38,67 @@ class Game:
         """不验证一部分操作合法性"""
         b = deepcopy(self.board)
         amount = len(op) // 2
-        dir = self.get_direction(op[1:])
+        if op[0] == 0:
+            dx, dy = 0, 1
+        elif op[0] == 1:
+            dx, dy = 0, -1
+        elif op[0] == 2:
+            dx, dy = 1, 1
+        elif op[0] == 3:
+            dx, dy = -1, -1
+        elif op[0] == 4:
+            dx, dy = 1, 0
+        elif op[0] == 5:
+            dx, dy = -1, 0
+        else:
+            raise InvalidDirection
+        if amount != 1:
+            dir = self.get_direction(op[1:])
         if amount == 1 or (dir != op[0] and dir + 1 != op[0]):  # 单个走或者平移
-            if op[0] == 0 or op[0] == 1:
-                d = 1 if op[0] == 0 else -1
-                for i in range(amount):
-                    if b[op[i * 2 + 1]][op[i * 2 + 2] + d] == 1:
-                        b[op[i * 2 + 1]][op[i * 2 + 2] + d] = player
-                        b[op[i * 2 + 1]][op[i * 2 + 2]] = 1
-                    else:
-                        raise CannotPush
-            elif op[0] == 2 or op[0] == 3:
-                d = 1 if op[0] == 2 else -1
-                for i in range(amount):
-                    if b[op[i * 2 + 1] + d][op[i * 2 + 2] + d] == 1:
-                        b[op[i * 2 + 1] + d][op[i * 2 + 2] + d] = player
-                        b[op[i * 2 + 1]][op[i * 2 + 2]] = 1
-                    else:
-                        raise CannotPush
-            else:
-                d = 1 if op[0] == 4 else -1
-                for i in range(amount):
-                    if b[op[i * 2 + 1] + d][op[i * 2 + 2]] == 1:
-                        b[op[i * 2 + 1] + d][op[i * 2 + 2]] = player
-                        b[op[i * 2 + 1]][op[i * 2 + 2]] = 1
-                    else:
-                        raise CannotPush
-            self.commit(b)
-            return
+            for i in range(amount):
+                if b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] == 1:
+                    b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] = player
+                    b[op[i * 2 + 1]][op[i * 2 + 2]] = 1
+                else:
+                    raise CannotGo
         else:  # 推
-
+            if dx == 1:
+                xm = max(*[op[i*2+1] for i in range(amount)])
+            elif dx == -1:
+                xm = min(*[op[i*2+1] for i in range(amount)])
+            else:  # == 0
+                xm = op[1]
+            if dy == 1:
+                ym = max(*[op[i*2+2] for i in range(amount)])
+            elif dy == -1:
+                ym = min(*[op[i*2+2] for i in range(amount)])
+            else:  # == 0
+                ym = op[2]
+            enemy_amount = 0
+            try:
+                while b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == (2 if player == 3 else 3):
+                    enemy_amount += 1
+            except IndexError:
+                if enemy_amount >= amount:
+                    raise CannotPush
+                elif enemy_amount > 0:
+                    self.dead.append(2 if player == 3 else 3)
+                else:
+                    raise CannotGo
+            else:
+                if enemy_amount >= amount:
+                    raise CannotPush
+                if enemy_amount > 0:
+                    if b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == 1:
+                        b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] = 2 if player == 3 else 3
+                    elif b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == 0:
+                        self.dead.append(2 if player == 3 else 3)
+                    else:
+                        raise CannotPush
+            b[xm + dx][xm + dy] = player
+            b[xm - (amount - 1) * dx][xm - (amount - 1) * dy] = 1
+        self.commit(b)
+        return
 
     @classmethod
     def get_direction(cls, pairs: Tuple[int]):
@@ -91,7 +120,7 @@ class Game:
         self.board = b
 
     def validate(self, op):
-        """验证合法性"""
+        """验证合法性，主要是1.棋子都是己方的，2.棋子都在一条线上且挨着"""
         if ...:
             raise InvalidOperation
         else:
@@ -99,7 +128,7 @@ class Game:
                 return self.operate(2, op)
             except IndexError:
                 return "走出棋盘了"
-            except CannotPush:
+            except CannotGo:
                 return "棋盘位置有棋子且无法推动"
 
     def judge(self):
@@ -117,3 +146,5 @@ class Game:
 
 if __name__ == '__main__':
     g = Game()
+    g.operate(2, (5,7,8,7, 7))
+    print(g.board)
