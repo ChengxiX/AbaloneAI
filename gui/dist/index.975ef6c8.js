@@ -651,33 +651,32 @@ function text(txt, x = 0, y = 0, parent = app.stage) {
     parent.addChild(basicText);
     return basicText;
 }
-let chosedText = text("");
-let chosedDirectionText = text("", 0, 20);
 const chooser = new (0, _pixiJs.Graphics)();
 chooser.beginFill(0x444444);
 chooser.drawCircle(380, 80, 10);
-chooser.drawRect(375, 60, 10, 50);
+chooser.drawRect(375, 80, 10, 50);
 chooser.endFill();
 chooser.position.set(380, 80);
 chooser.pivot.set(380, 80);
+chooser.rotation = (chosedDirection + 4.5) * 3.1415 / 3;
 chooser.interactive = true;
 chooser.buttonMode = true;
 chooser.on("pointerdown", onChooseStart);
 app.stage.addChild(chooser);
 function onChooseStart() {
     chosedDirection = (chosedDirection + 1) % 6;
-    this.rotation = chosedDirection * 3.1415 / 3;
-    chosedDirectionText.text = chosedDirection;
+    this.rotation = (chosedDirection + 4.5) * 3.1415 / 3;
+    document.getElementById("direction").innerHTML = "Direction " + chosedDirection;
 }
 function onDragStart() {
     if (this.alpha == 1) {
         this.alpha = 0.5;
         choosen.add(this.ij);
-        chosedText.text = Array.from(choosen);
+        document.getElementById("chosen").innerHTML = "Chosen " + String(Array.from(choosen));
     } else {
         this.alpha = 1;
         choosen.delete(this.ij);
-        chosedText.text = Array.from(choosen);
+        document.getElementById("chosen").innerHTML = "Chosen " + String(Array.from(choosen));
     }
 }
 function setBlackStone(x, y, i, j) {

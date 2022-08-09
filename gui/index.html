@@ -5,11 +5,13 @@
   <title>AbaloneAI</title>
 </head>
 
-<body bgcolor=#999978>
-  <p>ABALONE-AI</p>
-  <div id="canvasDiv">
-    <canvas id="pixiCanvas"></canvas>
+<body bgcolor=#999999>
+  <div onselectstart="return false;" unselectable="on">
+    <p>ABALONE-AI</p>
+    <p id="chosen">Chosen</p>
+    <p id="direction">Direction 0</p>
+    <script src="./src/index.js" type="module"></script>
   </div>
-  <script src="./src/index.js" type="module"></script>
+  
 </body>
 </html>

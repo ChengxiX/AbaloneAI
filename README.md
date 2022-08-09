@@ -10,3 +10,5 @@
 >npm run dev
 
 Server running at http://localhost:8080
+
+![basic-ui](gui\basic_ui.png)
