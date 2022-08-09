@@ -1,5 +1,7 @@
 import numpy as np
 import copy
+from operator import itemgetter
+
 
 """for pure MCTS without a policy-value network"""
 
@@ -17,9 +19,6 @@ def policy_value_fn(board):
     # sum(action_probs) = 1
     action_probs = np.ones(len(board.availables)) / len(board.availables)
     return zip(board.availables, action_probs), 0
-
-
-"""for MCTS with a policy-value network"""
 
 
 class TreeNode:
