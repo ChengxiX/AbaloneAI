@@ -98,8 +98,8 @@ class Game:
                         b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] = 2 if player == 3 else 3
                     elif b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == 0:
                         self.dead.append(2 if player == 3 else 3)
-            b[xm + dx][xm + dy] = player
-            b[xm - (amount - 1) * dx][xm - (amount - 1) * dy] = 1
+            b[xm + dx][ym + dy] = player
+            b[xm - (amount - 1) * dx][ym - (amount - 1) * dy] = 1
         self.commit(b)
         return
 
@@ -152,5 +152,5 @@ class Game:
 
 if __name__ == '__main__':
     g = Game()
-    g.validate(2, (5, 6, 4, 6, 3))
+    g.validate(2, (5, 6, 4, 6, 5))
     print(g.board)
