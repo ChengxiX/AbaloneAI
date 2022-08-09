@@ -11,4 +11,5 @@
 
 Server running at http://localhost:8080
 
-![basic-ui](gui\basic_ui.png)
+basic-ui ▼
+<img src="gui\basic_ui.png" style="zoom:80%;" />
