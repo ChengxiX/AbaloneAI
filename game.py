@@ -1,4 +1,3 @@
-from typing import Tuple
 from copy import deepcopy
 
 """
@@ -34,7 +33,7 @@ class Game:
                       [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
         self.dead = []
 
-    def operate(self, player: int, op: Tuple[int]):
+    def operate(self, player: int, op: tuple):
         """不验证一部分操作合法性"""
         b = deepcopy(self.board)
         amount = len(op) // 2
@@ -104,7 +103,7 @@ class Game:
         return
 
     @classmethod
-    def get_direction(cls, pairs: Tuple[int]):
+    def get_direction(cls, pairs: tuple):
         """(x,y,x,y,x,y) -> 0,2,4"""
         flag0 = True
         flag4 = True
@@ -148,9 +147,3 @@ class Game:
             return 3
         else:
             return 1
-
-
-if __name__ == '__main__':
-    g = Game()
-    g.validate(2, (5, 6, 4, 6, 5))
-    print(g.board)
