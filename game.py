@@ -33,7 +33,7 @@ class Game:
                       [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
         self.dead = []
 
-    def operate(self, player: int, op: tuple):
+    def operate(self, player: int, op: tuple, test: bool = False):
         """不验证一部分操作合法性"""
         b = deepcopy(self.board)
         amount = len(op) // 2
@@ -99,8 +99,11 @@ class Game:
                         self.dead.append(2 if player == 3 else 3)
             b[xm + dx][ym + dy] = player
             b[xm - (amount - 1) * dx][ym - (amount - 1) * dy] = 1
-        self.commit(b)
-        return
+        if not test:
+            self.commit(b)
+            return
+        else:
+            return True
 
     @classmethod
     def get_direction(cls, pairs: tuple):
