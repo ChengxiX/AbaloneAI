@@ -21,16 +21,22 @@ tuple 操作:
 
 
 class InvalidOperation(Exception): pass
+
+
 class CannotGo(InvalidOperation): pass  # 到边界
+
+
 class CannotPush(InvalidOperation): pass  # 推不动
+
+
 class InvalidDirection(InvalidOperation): pass
 
 
 class Game:
     def __init__(self):
-        self.board = [[3, 3, 3, 3, 3], [3, 3, 3, 3, 3, 3], [1, 1, 3, 3, 3, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 1, 1, 2, 2, 2, 1, 1],
-                      [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
+        self.board = [[3, 3, 3, 3, 3, 0, 0, 0, 0], [3, 3, 3, 3, 3, 3, 0, 0, 0], [1, 1, 3, 3, 3, 1, 1, 0, 0],
+                      [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
+                      [0, 0, 1, 1, 2, 2, 2, 1, 1], [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
         self.dead = []
 
     def operate(self, player: int, op: tuple, test: bool = False):
@@ -65,15 +71,15 @@ class Game:
                 raise CannotGo
         else:  # 推
             if dx == 1:
-                xm = max(*[op[i*2+1] for i in range(amount)])
+                xm = max(*[op[i * 2 + 1] for i in range(amount)])
             elif dx == -1:
-                xm = min(*[op[i*2+1] for i in range(amount)])
+                xm = min(*[op[i * 2 + 1] for i in range(amount)])
             else:  # == 0
                 xm = op[1]
             if dy == 1:
-                ym = max(*[op[i*2+2] for i in range(amount)])
+                ym = max(*[op[i * 2 + 2] for i in range(amount)])
             elif dy == -1:
-                ym = min(*[op[i*2+2] for i in range(amount)])
+                ym = min(*[op[i * 2 + 2] for i in range(amount)])
             else:  # == 0
                 ym = op[2]
             enemy_amount = 0
@@ -131,14 +137,14 @@ class Game:
         elif len(op) == 5:
             dx = op[3] - op[1]
             dy = op[4] - op[2]
-            if not (dx, dy) in ((0,1),(0,-1),(1,1),(-1,-1),(1,0),(-1,0)):  # 没挨着
+            if not (dx, dy) in ((0, 1), (0, -1), (1, 1), (-1, -1), (1, 0), (-1, 0)):  # 没挨着
                 raise InvalidOperation
         elif len(op) == 7:
-            pairs = [(op[i+1], op[i+2]) for i in range(len(op) // 2)]
+            pairs = [(op[i + 1], op[i + 2]) for i in range(len(op) // 2)]
             pairs.sort()
             dx = pairs[0][0] - pairs[1][0]
             dy = pairs[0][1] - pairs[1][1]
-            if not (dx, dy) in ((0,1),(0,-1),(1,1),(-1,-1),(1,0),(-1,0)):  # 没挨着
+            if not (dx, dy) in ((0, 1), (0, -1), (1, 1), (-1, -1), (1, 0), (-1, 0)):  # 没挨着
                 raise InvalidOperation
             if pairs[1][0] - pairs[2][0] != dx or pairs[1][1] - pairs[2][1] != dy:
                 raise InvalidOperation
