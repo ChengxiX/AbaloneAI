@@ -161,3 +161,112 @@ class Game:
             return 3
         else:
             return 1
+
+    def available_op(self, player):
+        enemy = 2 if player == 3 else 3
+        result = []
+        dir = 0
+        for i in range(9):
+            conti_p, conti_e, reverse, last = 0, 0, 0, 0
+            for j in range(len(self.board[i]) + 1):
+                if j == len(self.board[i]) or self.board[i][j] == 0:
+                    if conti_p > conti_e and conti_e < 3 and reverse == player:
+                        for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                            res = [dir]
+                            for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
+                                res += [i, l]
+                            result.append(tuple(res))
+                    elif last == player:
+                        if reverse == 1:
+                            # 反方向推空气
+                            for k in range(1, min(conti_p, 3) + 1):
+                                res = [dir + 1]
+                                for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                    res += [i, l]
+                                result.append(tuple(res))
+                        elif reverse == enemy:
+                            # 反方向推敌方
+                            if conti_p > conti_e and conti_e < 3:
+                                for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                                    res = [dir + 1]
+                                    for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                        res += [i, l]
+                                    result.append(tuple(res))
+                    break
+                elif self.board[i][j] == player:
+                    if last == 1:
+                        reverse = 1
+                        conti_p = 1
+                    elif last == enemy:
+                        # 如果reverse是player就两面包夹之势了，推不动
+                        if not reverse == player:
+                            reverse = enemy
+                        else:
+                            reverse = 0
+                        conti_p = 1
+                    elif last == player:
+                        conti_p += 1
+                elif self.board[i][j] == enemy:
+                    if last == enemy:
+                        conti_e += 1
+                    elif last == player:
+                        if reverse == 1:
+                            # 反向推空气
+                            for k in range(1, min(conti_p, 3) + 1):
+                                res = [dir + 1]
+                                for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                    res += [i, l]
+                                result.append(tuple(res))
+                        elif reverse == enemy:
+                            # 反向推敌方
+                            if conti_p > conti_e and conti_e < 3:
+                                for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                                    res = [dir + 1]
+                                    for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                        res += [i, l]
+                                    result.append(tuple(res))
+                        reverse = player
+                        conti_e = 1
+                    elif last == 1:
+                        reverse = 1
+                        conti_e = 1
+                elif self.board[i][j] == 1:
+                    if last == player:
+                        for k in range(1, min(conti_p, 3) + 1):  # 正向推空气
+                            res = [dir]
+                            for l in range(j - min(conti_p, 3), j)[-k:]:
+                                res += [i, l]
+                            result.append(tuple(res))
+                        if reverse == 1:   # 反向推空气
+                            for k in range(1, min(conti_p, 3) + 1):
+                                res = [dir + 1]
+                                for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                    res += [i, l]
+                                result.append(tuple(res))
+                        elif reverse == enemy:
+                            # 反向推敌方
+                            if conti_p > conti_e and conti_e < 3:
+                                for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                                    res = [dir + 1]
+                                    for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                        res += [i, l]
+                                    result.append(tuple(res))
+                    elif last == enemy:
+                        if conti_p > conti_e and conti_e < 3 and reverse == player:
+                            for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                                res = [dir]
+                                for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
+                                    res += [i, l]
+                                result.append(tuple(res))
+                    conti_p, conti_e = 0, 0
+                last = self.board[i][j]
+        return result
+
+
+if __name__ == '__main__':
+    g = Game()
+    g.board = [[3, 3, 3, 3, 3, 0, 0, 0, 0], [1, 3, 3, 3, 2, 2, 0, 0, 0], [1, 1, 3, 3, 3, 3, 1, 0, 0],
+               [1, 1, 3, 1, 1, 3, 1, 1, 0],
+               [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 1, 1, 2, 2, 2, 1, 1],
+               [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
+    print(g.available_op(3))
