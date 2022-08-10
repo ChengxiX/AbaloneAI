@@ -53,7 +53,7 @@ class Game:
             raise InvalidDirection
         if amount != 1:
             dir = self.get_direction(op[1:])
-        if amount == 1 or (dir != op[0] and dir + 1 != op[0]):  # 单个走或者平移
+        if amount == 1 or op[0] in (dir, dir + 1):  # 单个走或者平移
             try:
                 for i in range(amount):
                     if b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] == 1:
@@ -126,19 +126,24 @@ class Game:
 
     def validate(self, player, op):
         """验证合法性，主要是1.棋子都是己方的，数量小于4 2.棋子都在一条线上且挨着"""
-        amount = len(op) // 2
-        pairs = [(op[i * 2 + 1], op[i * 2 + 2]) for i in range(amount)]
-        pairs.sort()
         if not len(op) in (3, 5, 7):
             raise InvalidOperation
-        elif len(op) > 3:
+        elif len(op) == 5:
+            dx = op[3] - op[1]
+            dy = op[4] - op[2]
+            if not (dx, dy) in ((0,1),(0,-1),(1,1),(-1,-1),(1,0),(-1,0)):  # 没挨着
+                raise InvalidOperation
+        elif len(op) == 7:
+            pairs = [(op[i+1], op[i+2]) for i in range(len(op) // 2)]
+            pairs.sort()
             dx = pairs[0][0] - pairs[1][0]
             dy = pairs[0][1] - pairs[1][1]
-            for i in range(len(pairs)-2):
-                if pairs[i+1][0] - pairs[i+2][0] != dx or pairs[i+1][1] - pairs[i+1][1] != dy:
-                    raise InvalidOperation
-        for i in pairs:
-            if self.board[i[0]][i[1]] != player:
+            if not (dx, dy) in ((0,1),(0,-1),(1,1),(-1,-1),(1,0),(-1,0)):  # 没挨着
+                raise InvalidOperation
+            if pairs[1][0] - pairs[2][0] != dx or pairs[1][1] - pairs[2][1] != dy:
+                raise InvalidOperation
+        for i in range(len(op) // 2):
+            if self.board[i * 2 + 1][i * 2 + 2] != player:
                 raise InvalidOperation
         return self.operate(player, op)
 
