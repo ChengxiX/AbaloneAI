@@ -43,23 +43,25 @@ class Game:
         """不验证一部分操作合法性"""
         b = deepcopy(self.board)
         amount = len(op) // 2
-        if op[0] == 0:
-            dx, dy = 0, 1
-        elif op[0] == 1:
-            dx, dy = 0, -1
-        elif op[0] == 2:
-            dx, dy = 1, 1
-        elif op[0] == 3:
-            dx, dy = -1, -1
-        elif op[0] == 4:
-            dx, dy = 1, 0
-        elif op[0] == 5:
-            dx, dy = -1, 0
-        else:
-            raise InvalidDirection
+
         if amount != 1:
             dir = self.get_direction(op[1:])
         if amount == 1 or op[0] in (dir, dir + 1):  # 单个走或者平移
+            if op[0] == 0:
+                dx, dy = 0, 1
+            elif op[0] == 1:
+                dx, dy = 0, -1
+            elif op[0] == 2:
+                dx, dy = 1, 1
+            elif op[0] == 3:
+                dx, dy = -1, -1
+            elif op[0] == 4:
+                dx, dy = 1, 0
+            elif op[0] == 5:
+                dx, dy = -1, 0
+            else:
+                raise InvalidDirection
+
             try:
                 for i in range(amount):
                     if b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] == 1:
@@ -70,27 +72,42 @@ class Game:
             except IndexError:
                 raise CannotGo
         else:  # 推
-            if dx == 1:
-                xm = max(*[op[i * 2 + 1] for i in range(amount)])
-            elif dx == -1:
-                xm = min(*[op[i * 2 + 1] for i in range(amount)])
-            else:  # == 0
+            if op[0] == 0:
+                dx, dy = 0, 1
                 xm = op[1]
-            if dy == 1:
                 ym = max(*[op[i * 2 + 2] for i in range(amount)])
-            elif dy == -1:
+            elif op[0] == 1:
+                dx, dy = 0, -1
+                xm = op[1]
                 ym = min(*[op[i * 2 + 2] for i in range(amount)])
-            else:  # == 0
+            elif op[0] == 2:
+                dx, dy = 1, 1
+                xm = max(*[op[i * 2 + 1] for i in range(amount)])
+                ym = max(*[op[i * 2 + 2] for i in range(amount)])
+            elif op[0] == 3:
+                dx, dy = -1, -1
+                xm = min(*[op[i * 2 + 1] for i in range(amount)])
+                ym = min(*[op[i * 2 + 2] for i in range(amount)])
+            elif op[0] == 4:
+                dx, dy = 1, 0
+                xm = max(*[op[i * 2 + 1] for i in range(amount)])
                 ym = op[2]
+            elif op[0] == 5:
+                dx, dy = -1, 0
+                xm = min(*[op[i * 2 + 1] for i in range(amount)])
+                ym = op[2]
+            else:
+                raise InvalidDirection
+
             enemy_amount = 0
             try:
                 while b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == (2 if player == 3 else 3):
                     enemy_amount += 1
             except IndexError:
-                if enemy_amount >= amount:
-                    raise CannotPush
-                elif enemy_amount > 0:
+                if amount > enemy_amount > 0:
                     self.dead.append(2 if player == 3 else 3)
+                elif enemy_amount >= amount:
+                    raise CannotPush
                 else:
                     raise CannotGo
             else:
