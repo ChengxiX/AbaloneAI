@@ -16,7 +16,7 @@ class 方向(Enum):
     左下_右上 = 5
 
 tuple 操作:
-    (方向, 行, 列, 更多的行, 更多的列, 更多的行, 更多的列) 行列是坐标，列指行里的序数，按行序号排序，行相等时按列排序
+    ((dx, dy), 行, 列, 更多的行, 更多的列, 更多的行, 更多的列) 行列是坐标，列指行里的序数，按行序号排序，行相等时按列排序
 """
 
 
@@ -47,61 +47,31 @@ class Game:
         if amount != 1:
             dir = self.get_direction(op[1:])
         if amount == 1 or op[0] in (dir, dir + 1):  # 单个走或者平移
-            if op[0] == 0:
-                dx, dy = 0, 1
-            elif op[0] == 1:
-                dx, dy = 0, -1
-            elif op[0] == 2:
-                dx, dy = 1, 1
-            elif op[0] == 3:
-                dx, dy = -1, -1
-            elif op[0] == 4:
-                dx, dy = 1, 0
-            elif op[0] == 5:
-                dx, dy = -1, 0
-            else:
-                raise InvalidDirection
-
             try:
                 for i in range(amount):
-                    if b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] == 1:
-                        b[op[i * 2 + 1] + dx][op[i * 2 + 2] + dy] = player
+                    if b[op[i * 2 + 1] + op[0][0]][op[i * 2 + 2] + op[0][1]] == 1:
+                        b[op[i * 2 + 1] + op[0][0]][op[i * 2 + 2] + op[0][1]] = player
                         b[op[i * 2 + 1]][op[i * 2 + 2]] = 1
                     else:
                         raise CannotGo
             except IndexError:
                 raise CannotGo
         else:  # 推
-            if op[0] == 0:
-                dx, dy = 0, 1
-                xm = op[1]
-                ym = max(*[op[i * 2 + 2] for i in range(amount)])
-            elif op[0] == 1:
-                dx, dy = 0, -1
-                xm = op[1]
-                ym = min(*[op[i * 2 + 2] for i in range(amount)])
-            elif op[0] == 2:
-                dx, dy = 1, 1
+            if op[0][0] == 1:
                 xm = max(*[op[i * 2 + 1] for i in range(amount)])
+            elif op[0][0] == -1:
+                xm = min(*[op[i * 2 + 1] for i in range(amount)])
+            else:  # == 0
+                xm = op[1]
+            if op[0][1] == 1:
                 ym = max(*[op[i * 2 + 2] for i in range(amount)])
-            elif op[0] == 3:
-                dx, dy = -1, -1
-                xm = min(*[op[i * 2 + 1] for i in range(amount)])
+            elif op[0][1] == -1:
                 ym = min(*[op[i * 2 + 2] for i in range(amount)])
-            elif op[0] == 4:
-                dx, dy = 1, 0
-                xm = max(*[op[i * 2 + 1] for i in range(amount)])
+            else:  # == 0
                 ym = op[2]
-            elif op[0] == 5:
-                dx, dy = -1, 0
-                xm = min(*[op[i * 2 + 1] for i in range(amount)])
-                ym = op[2]
-            else:
-                raise InvalidDirection
-
             enemy_amount = 0
             try:
-                while b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == (2 if player == 3 else 3):
+                while b[xm + (enemy_amount + 1) * op[0][0]][ym + (enemy_amount + 1) * op[0][1]] == (2 if player == 3 else 3):
                     enemy_amount += 1
             except IndexError:
                 if amount > enemy_amount > 0:
@@ -113,15 +83,15 @@ class Game:
             else:
                 if enemy_amount >= amount:
                     raise CannotPush
-                elif b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == player:
+                elif b[xm + (enemy_amount + 1) * op[0][0]][ym + (enemy_amount + 1) * op[0][1]] == player:
                     raise CannotPush
                 elif enemy_amount > 0:
-                    if b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == 1:
-                        b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] = 2 if player == 3 else 3
-                    elif b[xm + (enemy_amount + 1) * dx][ym + (enemy_amount + 1) * dy] == 0:
+                    if b[xm + (enemy_amount + 1) * op[0][0]][ym + (enemy_amount + 1) * op[0][1]] == 1:
+                        b[xm + (enemy_amount + 1) * op[0][0]][ym + (enemy_amount + 1) * op[0][1]] = 2 if player == 3 else 3
+                    elif b[xm + (enemy_amount + 1) * op[0][0]][ym + (enemy_amount + 1) * op[0][1]] == 0:
                         self.dead.append(2 if player == 3 else 3)
-            b[xm + dx][ym + dy] = player
-            b[xm - (amount - 1) * dx][ym - (amount - 1) * dy] = 1
+            b[xm + op[0][0]][ym + op[0][1]] = player
+            b[xm - (amount - 1) * op[0][0]][ym - (amount - 1) * op[0][1]] = 1
         if not test:
             self.commit(b)
             return
@@ -168,7 +138,21 @@ class Game:
         for i in range(len(op) // 2):
             if self.board[i * 2 + 1][i * 2 + 2] != player:
                 raise InvalidOperation
-        return self.operate(player, op)
+        if op[0] == 0:
+            dx, dy = 0, 1
+        elif op[0] == 1:
+            dx, dy = 0, -1
+        elif op[0] == 2:
+            dx, dy = 1, 1
+        elif op[0] == 3:
+            dx, dy = -1, -1
+        elif op[0] == 4:
+            dx, dy = 1, 0
+        elif op[0] == 5:
+            dx, dy = -1, 0
+        else:
+            raise InvalidDirection
+        return self.operate(player, tuple([(dx, dy)]+op[1:]))
 
     def judge(self):
         """返回2是黑棋输了，返回3是白棋输了，返回1是没有结束"""
@@ -197,14 +181,14 @@ class Game:
                             result.append(tuple(res))
                     elif last == player:
                         if reverse == 1:
-                            # 反方向推空气
+                            # 反向推空气
                             for k in range(1, min(conti_p, 3) + 1):
                                 res = [dir + 1]
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [i, l]
                                 result.append(tuple(res))
                         elif reverse == enemy:
-                            # 反方向推敌方
+                            # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
                                 for k in range(conti_e + 1, min(conti_p, 3) + 1):
                                     res = [dir + 1]
