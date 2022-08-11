@@ -167,7 +167,6 @@ class Game:
     def available_op(self, player):
         enemy = 2 if player == 3 else 3
         result = []
-        dir = 0
         for i in range(9):
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
             for j in range(len(self.board[i]) + 1):
@@ -176,7 +175,7 @@ class Game:
                         continue
                     elif last == enemy and conti_p > conti_e and conti_e < 3 and reverse == player:
                         for k in range(conti_e + 1, min(conti_p, 3) + 1):
-                            res = [dir]
+                            res = [(0, 1)]
                             for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
                                 res += [i, l]
                             result.append(tuple(res))
@@ -184,7 +183,7 @@ class Game:
                         if reverse == 1:
                             # 反向推空气
                             for k in range(1, min(conti_p, 3) + 1):
-                                res = [dir + 1]
+                                res = [(0, -1)]
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [i, l]
                                 result.append(tuple(res))
@@ -192,7 +191,7 @@ class Game:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
                                 for k in range(conti_e + 1, min(conti_p, 3) + 1):
-                                    res = [dir + 1]
+                                    res = [(0, -1)]
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [i, l]
                                     result.append(tuple(res))
@@ -218,7 +217,7 @@ class Game:
                         if reverse == 1:
                             # 反向推空气
                             for k in range(1, min(conti_p, 3) + 1):
-                                res = [dir + 1]
+                                res = [(0, -1)]
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [i, l]
                                 result.append(tuple(res))
@@ -226,7 +225,7 @@ class Game:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
                                 for k in range(conti_e + 1, min(conti_p, 3) + 1):
-                                    res = [dir + 1]
+                                    res = [(0, -1)]
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [i, l]
                                     result.append(tuple(res))
@@ -238,13 +237,13 @@ class Game:
                 elif self.board[i][j] == 1:
                     if last == player:
                         for k in range(1, min(conti_p, 3) + 1):  # 正向推空气
-                            res = [dir]
+                            res = [(0, 1)]
                             for l in range(j - min(conti_p, 3), j)[-k:]:
                                 res += [i, l]
                             result.append(tuple(res))
                         if reverse == 1:   # 反向推空气
                             for k in range(1, min(conti_p, 3) + 1):
-                                res = [dir + 1]
+                                res = [(0, -1)]
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [i, l]
                                 result.append(tuple(res))
@@ -252,14 +251,14 @@ class Game:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
                                 for k in range(conti_e + 1, min(conti_p, 3) + 1):
-                                    res = [dir + 1]
+                                    res = [(0, -1)]
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [i, l]
                                     result.append(tuple(res))
                     elif last == enemy:
                         if conti_p > conti_e and conti_e < 3 and reverse == player:
                             for k in range(conti_e + 1, min(conti_p, 3) + 1):
-                                res = [dir]
+                                res = [(0, 1)]
                                 for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
                                     res += [i, l]
                                 result.append(tuple(res))
