@@ -170,7 +170,9 @@ class Game:
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
             for j in range(len(self.board[i]) + 1):
                 if j == len(self.board[i]) or self.board[i][j] == 0:
-                    if conti_p > conti_e and conti_e < 3 and reverse == player:
+                    if last == 0:
+                        continue
+                    elif last == enemy and conti_p > conti_e and conti_e < 3 and reverse == player:
                         for k in range(conti_e + 1, min(conti_p, 3) + 1):
                             res = [dir]
                             for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
@@ -192,7 +194,8 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [i, l]
                                     result.append(tuple(res))
-                    break
+                    if j == len(self.board[i]):
+                        break
                 elif self.board[i][j] == player:
                     if last == 1:
                         reverse = 1
@@ -266,7 +269,6 @@ class Game:
 if __name__ == '__main__':
     g = Game()
     g.board = [[3, 3, 3, 3, 3, 0, 0, 0, 0], [1, 3, 3, 3, 2, 2, 0, 0, 0], [1, 1, 3, 3, 3, 3, 1, 0, 0],
-               [1, 1, 3, 1, 1, 3, 1, 1, 0],
-               [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 1, 1, 2, 2, 2, 1, 1],
-               [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
-    print(g.available_op(3))
+               [1, 1, 3, 1, 1, 3, 1, 1, 0], [1, 1, 1, 1, 2, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
+               [0, 0, 1, 1, 2, 2, 2, 1, 1], [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
+    print(g.available_op(2))
