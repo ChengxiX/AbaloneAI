@@ -169,8 +169,8 @@ class Game:
         result = []
         for i in range(9):
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
-            for j in range(len(self.board[i]) + 1):
-                if j == len(self.board[i]) or self.board[i][j] == 0:
+            for j in range(10):
+                if j == 9 or self.board[i][j] == 0:
                     if last == 0:
                         continue
                     elif last == enemy and conti_p > conti_e and conti_e < 3 and reverse == player:
@@ -195,7 +195,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [i, l]
                                     result.append(tuple(res))
-                    if j == len(self.board[i]):
+                    if j == 9:
                         break
                 elif self.board[i][j] == player:
                     if last == 1:
@@ -264,6 +264,107 @@ class Game:
                                 result.append(tuple(res))
                     conti_p, conti_e = 0, 0
                 last = self.board[i][j]
+
+        # 4和5的方向
+        for i in range(9):
+            conti_p, conti_e, reverse, last = 0, 0, 0, 0
+            for j in range(10):
+                if j == 9 or self.board[j][i] == 0:
+                    if last == 0:
+                        continue
+                    elif last == enemy and conti_p > conti_e and conti_e < 3 and reverse == player:
+                        for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                            res = [(1, 0)]
+                            for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
+                                res += [l, i]
+                            result.append(tuple(res))
+                    elif last == player:
+                        if reverse == 1:
+                            # 反向推空气
+                            for k in range(1, min(conti_p, 3) + 1):
+                                res = [(-1, 0)]
+                                for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                    res += [l, i]
+                                result.append(tuple(res))
+                        elif reverse == enemy:
+                            # 反向推敌方
+                            if conti_p > conti_e and conti_e < 3:
+                                for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                                    res = [(-1, 0)]
+                                    for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                        res += [l, i]
+                                    result.append(tuple(res))
+                    if j == 9:
+                        break
+                elif self.board[j][i] == player:
+                    if last == 1:
+                        reverse = 1
+                        conti_p = 1
+                    elif last == enemy:
+                        # 如果reverse是player就两面包夹之势了，推不动
+                        if not reverse == player:
+                            reverse = enemy
+                        else:
+                            reverse = 0
+                        conti_p = 1
+                    elif last == player:
+                        conti_p += 1
+                elif self.board[j][i] == enemy:
+                    if last == enemy:
+                        conti_e += 1
+                    elif last == player:
+                        if reverse == 1:
+                            # 反向推空气
+                            for k in range(1, min(conti_p, 3) + 1):
+                                res = [(-1, 0)]
+                                for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                    res += [l, i]
+                                result.append(tuple(res))
+                        elif reverse == enemy:
+                            # 反向推敌方
+                            if conti_p > conti_e and conti_e < 3:
+                                for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                                    res = [(-1, 0)]
+                                    for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                        res += [l, i]
+                                    result.append(tuple(res))
+                        reverse = player
+                        conti_e = 1
+                    elif last == 1:
+                        reverse = 1
+                        conti_e = 1
+                elif self.board[j][i] == 1:
+                    if last == player:
+                        for k in range(1, min(conti_p, 3) + 1):  # 正向推空气
+                            res = [(1, 0)]
+                            for l in range(j - min(conti_p, 3), j)[-k:]:
+                                res += [l, i]
+                            result.append(tuple(res))
+                        if reverse == 1:  # 反向推空气
+                            for k in range(1, min(conti_p, 3) + 1):
+                                res = [(-1, 0)]
+                                for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                    res += [l, i]
+                                result.append(tuple(res))
+                        elif reverse == enemy:
+                            # 反向推敌方
+                            if conti_p > conti_e and conti_e < 3:
+                                for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                                    res = [(-1, 0)]
+                                    for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
+                                        res += [l, i]
+                                    result.append(tuple(res))
+                    elif last == enemy:
+                        if conti_p > conti_e and conti_e < 3 and reverse == player:
+                            for k in range(conti_e + 1, min(conti_p, 3) + 1):
+                                res = [(1, 0)]
+                                for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
+                                    res += [l, i]
+                                result.append(tuple(res))
+                    conti_p, conti_e = 0, 0
+                last = self.board[j][i]
+        # 2和3的方向
+
         return result
 
 
