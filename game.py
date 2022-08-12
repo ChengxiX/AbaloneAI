@@ -169,6 +169,7 @@ class Game:
         result = []
         for i in range(9):
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
+            up_minus, up, down, down_add = [], [], [], []
             for j in range(10):
                 if j == 9 or self.board[i][j] == 0:
                     if last == 0:
@@ -210,6 +211,26 @@ class Game:
                         conti_p = 1
                     elif last == player:
                         conti_p += 1
+                    try:
+                        if self.board[i-1][j] == 1:
+                            up.append(j)
+                    except IndexError:
+                        pass
+                    try:
+                        if self.board[i-1][j-1] == 1:
+                            up_minus.append(j)
+                    except IndexError:
+                        pass
+                    try:
+                        if self.board[i+1][j] == 1:
+                            down.append(j)
+                    except IndexError:
+                        pass
+                    try:
+                        if self.board[i+1][j+1] == 1:
+                            down_add.append(j)
+                    except IndexError:
+                        pass
                 elif self.board[i][j] == enemy:
                     if last == enemy:
                         conti_e += 1
@@ -264,10 +285,38 @@ class Game:
                                 result.append(tuple(res))
                     conti_p, conti_e = 0, 0
                 last = self.board[i][j]
-
+            for k in range(len(up) - 2):
+                if up[k+1] == up[k] + 1:
+                    result.append(((-1, 0), i, up[k], i, up[k+1]))
+                    if up[i+2] == up[i+1] + 1:
+                        result.append(((-1, 0), i, up[k], i, up[k+1], i, up[k+2]))
+            if up[-2] + 1 == up[-1]:
+                result.append(((-1, 0), i, up[-2], i, up[-1]))
+            for k in range(len(up_minus) - 2):
+                if up_minus[k+1] == up_minus[k] + 1:
+                    result.append(((-1, -1), i, up_minus[k], i, up_minus[k+1]))
+                    if up_minus[i+2] == up_minus[i+1] + 1:
+                        result.append(((-1, -1), i, up_minus[k], i, up_minus[k+1], i, up_minus[k+2]))
+            if up[-2] + 1 == up[-1]:
+                result.append(((-1, -1), i, up_minus[-2], i, up_minus[-1]))
+            for k in range(len(down) - 2):
+                if down[k+1] == down[k] + 1:
+                    result.append(((1, 0), i, down[k], i, down[k+1]))
+                    if down[i+2] == down[i+1] + 1:
+                        result.append(((1, 0), i, down[k], i, down[k+1], i, down[k+2]))
+            if down[-2] + 1 == down[-1]:
+                result.append(((1, 0), i, down[-2], i, down[-1]))
+            for k in range(len(down_add) - 2):
+                if down_add[k+1] == down_add[k] + 1:
+                    result.append(((1, 1), i, down_add[k], i, down_add[k+1]))
+                    if down_add[i+2] == down_add[i+1] + 1:
+                        result.append(((1, 1), i, down_add[k], i, down_add[k+1], i, down_add[k+2]))
+            if down_add[-2] + 1 == down_add[-1]:
+                result.append(((1, 1), i, down_add[-2], i, down_add[-1]))
         # 4和5的方向
         for i in range(9):
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
+            up_minus, up, down, down_add = [], [], [], []
             for j in range(10):
                 if j == 9 or self.board[j][i] == 0:
                     if last == 0:
@@ -309,6 +358,26 @@ class Game:
                         conti_p = 1
                     elif last == player:
                         conti_p += 1
+                    try:
+                        if self.board[j-1][i] == 1:
+                            up.append(j)
+                    except IndexError:
+                        pass
+                    try:
+                        if self.board[j-1][i-1] == 1:
+                            up_minus.append(j)
+                    except IndexError:
+                        pass
+                    try:
+                        if self.board[j+1][i] == 1:
+                            down.append(j)
+                    except IndexError:
+                        pass
+                    try:
+                        if self.board[j+1][i+1] == 1:
+                            down_add.append(j)
+                    except IndexError:
+                        pass
                 elif self.board[j][i] == enemy:
                     if last == enemy:
                         conti_e += 1
@@ -363,7 +432,34 @@ class Game:
                                 result.append(tuple(res))
                     conti_p, conti_e = 0, 0
                 last = self.board[j][i]
-
+            for k in range(len(up) - 2):
+                if up[k+1] == up[k] + 1:
+                    result.append(((0, -1), i, up[k], i, up[k+1]))
+                    if up[i+2] == up[i+1] + 1:
+                        result.append(((0, -1), i, up[k], i, up[k+1], i, up[k+2]))
+            if up[-2] + 1 == up[-1]:
+                result.append(((0, -1), i, up[-2], i, up[-1]))
+            for k in range(len(up_minus) - 2):
+                if up_minus[k+1] == up_minus[k] + 1:
+                    result.append(((-1, -1), i, up_minus[k], i, up_minus[k+1]))
+                    if up_minus[i+2] == up_minus[i+1] + 1:
+                        result.append(((-1, -1), i, up_minus[k], i, up_minus[k+1], i, up_minus[k+2]))
+            if up[-2] + 1 == up[-1]:
+                result.append(((-1, -1), i, up_minus[-2], i, up_minus[-1]))
+            for k in range(len(down) - 2):
+                if down[k+1] == down[k] + 1:
+                    result.append(((0, 1), i, down[k], i, down[k+1]))
+                    if down[i+2] == down[i+1] + 1:
+                        result.append(((0, 1), i, down[k], i, down[k+1], i, down[k+2]))
+            if down[-2] + 1 == down[-1]:
+                result.append(((0, 1), i, down[-2], i, down[-1]))
+            for k in range(len(down_add) - 2):
+                if down_add[k+1] == down_add[k] + 1:
+                    result.append(((1, 1), i, down_add[k], i, down_add[k+1]))
+                    if down_add[i+2] == down_add[i+1] + 1:
+                        result.append(((1, 1), i, down_add[k], i, down_add[k+1], i, down_add[k+2]))
+            if down_add[-2] + 1 == down_add[-1]:
+                result.append(((1, 1), i, down_add[-2], i, down_add[-1]))
         # 2和3的方向
         for offset in range(-4, 4):
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
