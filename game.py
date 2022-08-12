@@ -361,7 +361,7 @@ class Game:
                     elif last == player:
                         conti_p += 1
                     try:
-                        if self.board[j - 1][i] == 1:
+                        if self.board[j][i - 1] == 1:
                             up.append(j)
                     except IndexError:
                         pass
@@ -371,7 +371,7 @@ class Game:
                     except IndexError:
                         pass
                     try:
-                        if self.board[j + 1][i] == 1:
+                        if self.board[j][i + 1] == 1:
                             down.append(j)
                     except IndexError:
                         pass
@@ -625,9 +625,9 @@ class Game:
 
 if __name__ == '__main__':
     g = Game()
-    g.board = [[3, 3, 3, 3, 3, 0, 0, 0, 0], [3, 3, 3, 3, 3, 3, 0, 0, 0], [1, 1, 3, 3, 3, 1, 1, 0, 0],
-                [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
-                [0, 0, 1, 1, 2, 2, 2, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]
-    r = g.available_op(2)
+    """g.board = [[1, 1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 3, 1, 1, 0, 0, 0], [1, 1, 1, 1, 3, 1, 1, 0, 0],
+                [1, 1, 1, 1, 1, 3, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 2, 1, 1],
+                [0, 0, 1, 1, 1, 1, 2, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]"""
+    r = g.available_op(3)
     print(r)
     print(len(r))
