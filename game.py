@@ -290,30 +290,30 @@ class Game:
             for k in range(len(up) - 2):
                 if up[k + 1] == up[k] + 1:
                     result.append(((-1, 0), i, up[k], i, up[k + 1]))
-                    if up[k + 2] == up[k + 1] + 1:
+                    if len(up) > 2 and up[k + 2] == up[k + 1] + 1:
                         result.append(((-1, 0), i, up[k], i, up[k + 1], i, up[k + 2]))
-            if up[-2] + 1 == up[-1]:
+            if len(up) > 3 and up[-2] + 1 == up[-1]:
                 result.append(((-1, 0), i, up[-2], i, up[-1]))
             for k in range(len(up_minus) - 2):
                 if up_minus[k + 1] == up_minus[k] + 1:
                     result.append(((-1, -1), i, up_minus[k], i, up_minus[k + 1]))
-                    if up_minus[k + 2] == up_minus[k + 1] + 1:
+                    if len(up_minus) > 2 and up_minus[k + 2] == up_minus[k + 1] + 1:
                         result.append(((-1, -1), i, up_minus[k], i, up_minus[k + 1], i, up_minus[k + 2]))
-            if up[-2] + 1 == up[-1]:
+            if len(up_minus) > 3 and up_minus[-2] + 1 == up_minus[-1]:
                 result.append(((-1, -1), i, up_minus[-2], i, up_minus[-1]))
             for k in range(len(down) - 2):
                 if down[k + 1] == down[k] + 1:
                     result.append(((1, 0), i, down[k], i, down[k + 1]))
-                    if down[k + 2] == down[k + 1] + 1:
+                    if len(down) > 2 and down[k + 2] == down[k + 1] + 1:
                         result.append(((1, 0), i, down[k], i, down[k + 1], i, down[k + 2]))
-            if down[-2] + 1 == down[-1]:
+            if len(down) > 3 and down[-2] + 1 == down[-1]:
                 result.append(((1, 0), i, down[-2], i, down[-1]))
             for k in range(len(down_add) - 2):
                 if down_add[k + 1] == down_add[k] + 1:
                     result.append(((1, 1), i, down_add[k], i, down_add[k + 1]))
-                    if down_add[k + 2] == down_add[k + 1] + 1:
+                    if len(down_add) > 2 and down_add[k + 2] == down_add[k + 1] + 1:
                         result.append(((1, 1), i, down_add[k], i, down_add[k + 1], i, down_add[k + 2]))
-            if down_add[-2] + 1 == down_add[-1]:
+            if len(down_add) > 3 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((1, 1), i, down_add[-2], i, down_add[-1]))
         # 4和5的方向
         for i in range(9):
@@ -437,30 +437,30 @@ class Game:
             for k in range(len(up) - 2):
                 if up[k + 1] == up[k] + 1:
                     result.append(((0, -1), up[k], i, up[k + 1], i))
-                    if up[k + 2] == up[k + 1] + 1:
+                    if len(up) > 2 and up[k + 2] == up[k + 1] + 1:
                         result.append(((0, -1), up[k], i, up[k + 1], i, up[k + 2], i))
-            if up[-2] + 1 == up[-1]:
+            if len(up) > 3 and up[-2] + 1 == up[-1]:
                 result.append(((0, -1), up[-2], i, up[-1], i))
             for k in range(len(up_minus) - 2):
                 if up_minus[k + 1] == up_minus[k] + 1:
                     result.append(((-1, -1), up_minus[k], i, up_minus[k + 1], i))
-                    if up_minus[k + 2] == up_minus[k + 1] + 1:
+                    if len(up_minus) > 2 and up_minus[k + 2] == up_minus[k + 1] + 1:
                         result.append(((-1, -1), up_minus[k], i, up_minus[k + 1], i, up_minus[k + 2], i))
-            if up[-2] + 1 == up[-1]:
+            if len(up_minus) > 3 and up_minus[-2] + 1 == up_minus[-1]:
                 result.append(((-1, -1), up_minus[-2], i, up_minus[-1], i))
             for k in range(len(down) - 2):
                 if down[k + 1] == down[k] + 1:
                     result.append(((0, 1), down[k], i, down[k + 1], i))
-                    if down[k + 2] == down[k + 1] + 1:
+                    if len(down) > 2 and down[k + 2] == down[k + 1] + 1:
                         result.append(((0, 1), down[k], i, down[k + 1], i, down[k + 2], i))
-            if down[-2] + 1 == down[-1]:
+            if len(down) > 3 and down[-2] + 1 == down[-1]:
                 result.append(((0, 1), down[-2], i, down[-1], i))
             for k in range(len(down_add) - 2):
                 if down_add[k + 1] == down_add[k] + 1:
                     result.append(((1, 1), down_add[k], i, down_add[k + 1], i))
-                    if down_add[k + 2] == down_add[k + 1] + 1:
+                    if len(down_add) > 2 and down_add[k + 2] == down_add[k + 1] + 1:
                         result.append(((1, 1), down_add[k], i, down_add[k + 1], i, down_add[k + 2], i))
-            if down_add[-2] + 1 == down_add[-1]:
+            if len(down_add) > 3 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((1, 1), down_add[-2], i, down_add[-1], i))
         # 2和3的方向
         for offset in range(-4, 4):
@@ -588,37 +588,37 @@ class Game:
             for k in range(len(up) - 2):
                 if up[k + 1] == up[k] + 1:
                     result.append(((-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1]))
-                    if up[k + 2] == up[k + 1] + 1:
+                    if len(up) > 2 and up[k + 2] == up[k + 1] + 1:
                         result.append((
                                       (-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1], offset + up[k + 2],
                                       up[k + 2]))
-            if up[-2] + 1 == up[-1]:
+            if len(up) > 3 and up[-2] + 1 == up[-1]:
                 result.append(((-1, 0), offset + up[-2], up[-2], offset + up[-1], up[-1]))
             for k in range(len(up_minus) - 2):
                 if up_minus[k + 1] == up_minus[k] + 1:
                     result.append(
                         ((0, 1), up_minus[k] + offset, up_minus[k], up_minus[k + 1] + offset, up_minus[k + 1]))
-                    if up_minus[k + 2] == up_minus[k + 1] + 1:
+                    if len(up_minus) > 2 and up_minus[k + 2] == up_minus[k + 1] + 1:
                         result.append(((0, 1), up_minus[k] + offset, up_minus[k], up_minus[k + 1] + offset,
                                        up_minus[k + 1], up_minus[k + 2] + offset, up_minus[k + 2]))
-            if up[-2] + 1 == up[-1]:
+            if len(up_minus) > 3 and up_minus[-2] + 1 == up_minus[-1]:
                 result.append(((0, 1), up_minus[-2] + offset, up_minus[-2], up_minus[-1] + offset, up_minus[-1]))
             for k in range(len(down) - 2):
                 if down[k + 1] == down[k] + 1:
                     result.append(((1, 0), down[k] + offset, down[k], down[k + 1] + offset, down[k + 1]))
-                    if down[k + 2] == down[k + 1] + 1:
+                    if len(down) > 2 and down[k + 2] == down[k + 1] + 1:
                         result.append(((1, 0), down[k] + offset, down[k], down[k + 1] + offset, down[k + 1],
                                        down[k + 2] + offset, down[k + 2]))
-            if down[-2] + 1 == down[-1]:
+            if len(down) > 3 and down[-2] + 1 == down[-1]:
                 result.append(((1, 0), down[-2] + offset, down[-2], down[-1] + offset, down[-1]))
             for k in range(len(down_add) - 2):
                 if down_add[k + 1] == down_add[k] + 1:
                     result.append(
                         ((0, -1), down_add[k] + offset, down_add[k], down_add[k + 1] + offset, down_add[k + 1]))
-                    if down_add[k + 2] == down_add[k + 1] + 1:
+                    if len(down_add) > 2 and down_add[k + 2] == down_add[k + 1] + 1:
                         result.append(((0, -1), down_add[k] + offset, down_add[k], down_add[k + 1] + offset,
                                        down_add[k + 1], down_add[k + 2] + offset, down_add[k + 2]))
-            if down_add[-2] + 1 == down_add[-1]:
+            if len(down_add) > 3 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
         return result
 
