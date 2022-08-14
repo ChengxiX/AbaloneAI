@@ -1,3 +1,5 @@
 
 gui/.parcel-cache
 gui/node_modules
+.idea/
+.vscode/

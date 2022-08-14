@@ -66,7 +66,9 @@ class PolicyValueModule(nn.Module):
         # = (9*9)*(9*9+1)*(9*9+1)*6 = 3267864
         self.ap_conv1_base = nn.Conv2d(128, 4, kernel_size=(1,))
         self.ap_fc1 = nn.Linear(4 * 9 * 9, 9 * 9)
+        self.ap_conv2_base_on_v1 = nn.Conv2d(256, 4, kernel_size=(1,))
         self.ap_fc2 = nn.Linear(4 * 9 * 9, 9 * 9)
+        self.ap_conv3_base_on_v1v2 = nn.Conv2d(384, 4, kernel_size=(1,))
         self.ap_fc3 = nn.Linear(4 * 9 * 9, 9 * 9)
         self.ap_direc_fc1 = nn.Linear(4 * 9 * 9, 9 * 9)
         self.ap_direc_fc2 = nn.Linear(9 * 9, 3 * 3)
@@ -78,7 +80,7 @@ class PolicyValueModule(nn.Module):
 
         # state value layers
         self.sv_conv1 = nn.Conv2d(128, 2, kernel_size=(1,))
-        self.sv_fc1 = nn.Linear(2 * 9 * 9, 64)
+        self.sv_fc1 = nn.Linear(5 * 9 * 9, 64)
         self.sv_fc2 = nn.Linear(64, 1)
         pass
 
@@ -90,22 +92,28 @@ class PolicyValueModule(nn.Module):
 
         # action policy
         # pick stone 1
-        ap_base = F.relu(self.ap_conv1(x))
-        ap_base = ap_base.view(-1, 4 * 9 * 9)
-        ap1 = F.log_softmax(self.ap_fc1(ap_base))
-        # pick stone 2 final choose is base on ap1
-        ap2 = F.log_softmax(self.ap_fc2(ap_base))
-        # pick stone 3 final choose is base on ap1 & ap2
-        ap3 = F.log_softmax(self.ap_fc3(ap_base))
+        ap1_base = F.relu(self.ap_conv1(x))
+        ap1_base = ap1_base.view(-1, 4 * 9 * 9)
+        ap1 = F.log_softmax(self.ap_fc1(ap1_base))
+
+        # pick stone 2 is base on ap1
+        ap2_base = F.relu(self.ap_conv2_base_on_v1(torch.cat([x] + [ap1]*128, dim=0)))
+        ap2 = F.log_softmax(self.ap_fc2(ap2_base))
+
+        # pick stone 3 is base on ap1 & ap2
+        ap3_base = F.relu(self.ap_conv3_base_on_v1v2(torch.cat([x] + [ap1]*128 + [ap2]*128), dim=0))
+        ap3 = F.log_softmax(self.ap_fc3(ap3_base))
         # choose direction --> [[-1,0,1],[-1,0,1]]
-        ap_direc = F.relu(self.ap_direc_fc1(ap_base))
+
+        # pick direc is base on ap1 & ap2 & ap3
+        ap_direc = F.relu(self.ap_direc_fc1(torch.cat((x, ap1, ap2, ap3), dim=0)))
         ap_direc = F.relu(self.ap_direc_fc2(ap_direc))
 
         # state value
         sv = F.relu(self.sv_conv1(x))
         sv = sv.view(-1, 2 * 9 * 9)
         sv = F.relu(self.sv_fc1(sv))
-        # tanh function for [-1,1] value output
+        # F.tanh function for [-1,1] value output
         sv = F.tanh(self.sv_fc2(sv))
 
         return ap1, ap2, ap3, ap_direc, sv
@@ -132,7 +140,7 @@ class PolicyValueNet:
         pass
 
     def policy_value_output(self, broad, player):
-        available_op = game.Game.available_op(broad) #
+        available_op = game.Game.available_op(broad)  #
         input_board = convert_board(broad, player)
         if self.use_gpu:
             ap1, ap2, ap3, ap_direc, sv = self.poliy_value_net(
