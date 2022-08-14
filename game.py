@@ -213,6 +213,8 @@ class Game:
                         conti_p = 1
                     elif last == player:
                         conti_p += 1
+                    else:
+                        conti_p = 1
                     try:
                         if self.board[i - 1][j] == 1:
                             up.append(j)
@@ -360,6 +362,8 @@ class Game:
                         conti_p = 1
                     elif last == player:
                         conti_p += 1
+                    else:
+                        conti_p = 1
                     try:
                         if self.board[j][i - 1] == 1:
                             up.append(j)
@@ -463,7 +467,7 @@ class Game:
             if len(down_add) > 1 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((1, 1), down_add[-2], i, down_add[-1], i))
         # 2和3的方向
-        for offset in range(-4, 4):
+        for offset in range(-4, 5):
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
             up_minus, up, down, down_add = [], [], [], []
             for j in range(10):
@@ -511,6 +515,8 @@ class Game:
                         conti_p = 1
                     elif last == player:
                         conti_p += 1
+                    else:
+                        conti_p = 1
                     try:
                         if self.board[j + offset - 1][j] == 1:
                             up.append(j)
@@ -625,9 +631,10 @@ class Game:
 
 if __name__ == '__main__':
     g = Game()
-    """g.board = [[1, 1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 3, 1, 1, 0, 0, 0], [1, 1, 1, 1, 3, 1, 1, 0, 0],
-                [1, 1, 1, 1, 1, 3, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 2, 1, 1],
-                [0, 0, 1, 1, 1, 1, 2, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]"""
-    r = g.available_op(3)
+    #g.board = [[3, 3, 3, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0, 0],
+    #            [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
+    #            [0, 0, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]
+    r = g.available_op(2)
+    r.sort(key=lambda x: (x[0], len(x)))
     print(r)
     print(len(r))
