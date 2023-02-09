@@ -15,9 +15,13 @@ class 方向(Enum):
     右上_左下 = 4
     左下_右上 = 5
 
-tuple 操作:
+tuple 操作 长版long:
     ((dx, dy), 行, 列, 更多的行, 更多的列, 更多的行, 更多的列) 行列是坐标，列指行里的序数，按行序号排序，行相等时按列排序
-在validate仍然还是接受(方向, 行, 列, 更多的行, 更多的列, 更多的行, 更多的列)
+tuple 操作 面向人的长版human-long: (在validate仍然还是接受)
+    (方向, 行, 列, 更多的行, 更多的列, 更多的行, 更多的列)
+tuple 操作 面向机器的短版short:
+    (最后一个棋子的x, 最后一个棋子的y, 剩余棋子延展方向六选一class方向, num棋子的多少, 六选一的偏向)
+    六选一的偏向指如果偏左的平移就是0，不偏的推就是1，偏右的平移就是2
 """
 
 
@@ -47,7 +51,7 @@ class Game:
 
         if amount != 1:
             dir = self.get_direction(op[1:])
-        if amount == 1 or op[0] in (dir, dir + 1):  # 单个走或者平移
+        if amount == 1 or not op[0] in {dir, dir + 1}:  # 单个走或者平移 # 寒假末在这里加了一个not，应该是最早的时候漏掉了
             try:
                 for i in range(amount):
                     if b[op[i * 2 + 1] + op[0][0]][op[i * 2 + 2] + op[0][1]] == 1:
@@ -58,6 +62,7 @@ class Game:
             except IndexError:
                 raise CannotGo
         else:  # 推
+            # 下面这段是要获取最前面，直接怼着对面的棋子
             if op[0][0] == 1:
                 xm = max(*[op[i * 2 + 1] for i in range(amount)])
             elif op[0][0] == -1:
@@ -102,6 +107,102 @@ class Game:
             return True
 
     @classmethod
+    def convert_long_to_short(cls, op):
+        if op[0] == (0, 1):
+            dir = 0
+        elif op[0] == (0, -1):
+            dir = 1
+        elif op[0] == (1, 1):
+            dir = 2
+        elif op[0] == (-1, -1):
+            dir = 3
+        elif op[0] == (1, 0):
+            dir = 4
+        elif op[0] == (-1, 0):
+            dir = 5
+        else:
+            raise InvalidDirection
+        amount = len(op) // 2
+        if amount == 1:
+            return op[1], op[2], dir, 1  # 特例，只有一个
+        place_dir = cls.get_direction(op[1:])
+        if dir in {place_dir, place_dir + 1}:  # 推
+            # 下面这段是要获取最后面的棋子
+            if op[0][0] == 1:
+                xm = min(*[op[i * 2 + 1] for i in range(amount)])
+            elif op[0][0] == -1:
+                xm = max(*[op[i * 2 + 1] for i in range(amount)])
+            else:  # == 0
+                xm = op[1]
+            if op[0][1] == 1:
+                ym = min(*[op[i * 2 + 2] for i in range(amount)])
+            elif op[0][1] == -1:
+                ym = max(*[op[i * 2 + 2] for i in range(amount)])
+            else:  # == 0
+                ym = op[2]
+            return xm, ym, dir, amount, 0
+        # 平移
+        """        if op[0] == 0:
+                        dx, dy = 0, 1
+                    elif op[0] == 1:
+                        dx, dy = 0, -1
+                    elif op[0] == 2:
+                        dx, dy = 1, 1
+                    elif op[0] == 3:
+                        dx, dy = -1, -1
+                    elif op[0] == 4:
+                        dx, dy = 1, 0
+                    elif op[0] == 5:
+                        dx, dy = -1, 0
+                    else:
+                        raise InvalidDirection"""
+        if place_dir == 0:
+            xm = op[1]
+            if dir in {2,5}:
+                ym = min(*[op[i * 2 + 2] for i in range(amount)])
+                if dir == 2:
+                    return xm, ym, 0, amount, 2
+                else:
+                    return xm, ym, 0, amount, 0
+            else:
+                ym = max(*[op[i * 2 + 2] for i in range(amount)])
+                if dir == 3:
+                    return xm, ym, 1, amount, 2
+                else:
+                    return xm, ym, 1, amount, 0
+        elif place_dir == 2:
+            if dir in {0,4}:
+                xm = min(*[op[i * 2 + 1] for i in range(amount)])
+                ym = min(*[op[i * 2 + 2] for i in range(amount)])
+                if dir == 4:
+                    return xm, ym, 2, amount, 2
+                else:
+                    return xm, ym, 2, amount, 0
+            else:
+                xm = max(*[op[i * 2 + 1] for i in range(amount)])
+                ym = max(*[op[i * 2 + 2] for i in range(amount)])
+                if dir == 5:
+                    return xm, ym, 3, amount, 2
+                else:
+                    return xm, ym, 3, amount, 0
+
+        elif place_dir == 4:
+            if dir in {1, 2}:
+                xm = min(*[op[i * 2 + 1] for i in range(amount)])
+                ym = op[2]
+                if dir == 1:
+                    return xm, ym, 4, amount, 2
+                else:
+                    return xm, ym, 4, amount, 0
+            else:
+                xm = max(*[op[i * 2 + 1] for i in range(amount)])
+                ym = op[2]
+                if dir == 0:
+                    return xm, ym, 5, amount, 2
+                else:
+                    return xm, ym, 5, amount, 0
+
+    @classmethod
     def get_direction(cls, pairs: tuple):
         """(x,y,x,y,x,y) -> 0,2,4"""
         flag0 = True
@@ -122,19 +223,19 @@ class Game:
 
     def validate(self, player, op):
         """验证合法性，主要是1.棋子都是己方的，数量小于4 2.棋子都在一条线上且挨着"""
-        if not len(op) in (3, 5, 7):
+        if not len(op) in {3, 5, 7}:
             raise InvalidOperation
         elif len(op) == 5:
             dx = op[3] - op[1]
             dy = op[4] - op[2]
-            if not (dx, dy) in ((0, 1), (0, -1), (1, 1), (-1, -1), (1, 0), (-1, 0)):  # 没挨着
+            if not (dx, dy) in {(0, 1), (0, -1), (1, 1), (-1, -1), (1, 0), (-1, 0)}:  # 没挨着
                 raise InvalidOperation
         elif len(op) == 7:
             pairs = [(op[i + 1], op[i + 2]) for i in range(len(op) // 2)]
             pairs.sort()
             dx = pairs[0][0] - pairs[1][0]
             dy = pairs[0][1] - pairs[1][1]
-            if not (dx, dy) in ((0, 1), (0, -1), (1, 1), (-1, -1), (1, 0), (-1, 0)):  # 没挨着
+            if not (dx, dy) in {(0, 1), (0, -1), (1, 1), (-1, -1), (1, 0), (-1, 0)}:  # 没挨着
                 raise InvalidOperation
             if pairs[1][0] - pairs[2][0] != dx or pairs[1][1] - pairs[2][1] != dy:
                 raise InvalidOperation
@@ -635,6 +736,6 @@ if __name__ == '__main__':
     #            [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
     #            [0, 0, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]
     r = g.available_op(2)
-    r.sort(key=lambda x: (x[0], len(x)))
-    print(r)
+    #r.sort(key=lambda x: (x[0], len(x)))
+    #print(r)
     print(len(r))
