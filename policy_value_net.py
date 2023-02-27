@@ -4,7 +4,7 @@ GPU: RTX3060
 CUDA: 11.3
 install with: conda install pytorch torchvision torchaudio cudatoolkit=11.3
 torch.__version__: 1.12.1
-配置pytorch和CUDA遇到好多问题（）
+配置pytorch和CUDA遇到好多问题()
 """
 import numpy as np
 import torch
@@ -31,10 +31,22 @@ class 格子(Enum):
     空的 = 1
     黑棋 = 2  # 下方
     白棋 = 3  # 上方
+
+class 方向(Enum):
+    左_右 = 0
+    右_左 = 1
+    左上_右下 = 2
+    右下_左上 = 3
+    右上_左下 = 4
+    左下_右上 = 5
+
+class op_version(tuple):
+    op = (最后一个棋子的x, 最后一个棋子的y, 剩余棋子延展方向六选一class方向, num棋子的多少, 六选一的偏向)
+    六选一的偏向指如果偏左的平移就是0，不偏的推就是1，偏右的平移就是2
+
 '''
 
-
-def convert_board(board, player):  # 0:white 1:black
+def convert_board(board, player):  # player:machine's side 0:white 1:black
     """
     input: board --> list
     output: input_board --> torch.Size([4, 9, 9])
@@ -45,10 +57,6 @@ def convert_board(board, player):  # 0:white 1:black
     board_black = torch.where(board_tensor == 2, 1, 0)
     board_player = torch.ones_like(board_tensor) * player
     return torch.stack([board_border, board_white, board_black, board_player])
-
-
-def convert_op(ap1, ap2, ap3, ap_direc, ):
-    pass
 
 
 class PolicyValueModule(nn.Module):
@@ -64,23 +72,15 @@ class PolicyValueModule(nn.Module):
         # num of all action(include a lot impossible ones) =
         # = first*second*third*direction
         # = (9*9)*(9*9+1)*(9*9+1)*6 = 3267864
-        self.ap_conv1_base = nn.Conv2d(128, 4, kernel_size=(1,))
-        self.ap_fc1 = nn.Linear(4 * 9 * 9, 9 * 9)
-        self.ap_conv2_base_on_v1 = nn.Conv2d(256, 4, kernel_size=(1,))
-        self.ap_fc2 = nn.Linear(4 * 9 * 9, 9 * 9)
-        self.ap_conv3_base_on_v1v2 = nn.Conv2d(384, 4, kernel_size=(1,))
-        self.ap_fc3 = nn.Linear(4 * 9 * 9, 9 * 9)
-        self.ap_direc_fc1 = nn.Linear(4 * 9 * 9, 9 * 9)
-        self.ap_direc_fc2 = nn.Linear(9 * 9, 3 * 3)
-        # 3*3 -->
-        # x\y  -1   0   1
-        # -1 [[1/9,1/9,1/9],
-        #  0  [1/9,1/9,1/9],
-        #  1  [1/9,1/9,1/9]]
+        self.op = nn.Conv2d(128, 4, kernel_size=(1,))
+        self.op_xydirec = nn.Conv3d(4, 6, kernel_size=(1,))
+        self.
+        self.op_num = nn.Linear(6 * 9 * 9, 3 * 6 * 9 * 9)
+        self.op_final = nn.Linear(3 * 6 * 9 * 9,6 * 3 * 6 * 9 * 9)
 
         # state value layers
-        self.sv_conv1 = nn.Conv2d(128, 2, kernel_size=(1,))
-        self.sv_fc1 = nn.Linear(5 * 9 * 9, 64)
+        self.sv_conv1 = nn.Conv2d(128, 4, kernel_size=(1,))
+        self.sv_fc1 = nn.Linear(4 * 9 * 9, 64)
         self.sv_fc2 = nn.Linear(64, 1)
         pass
 
@@ -91,27 +91,17 @@ class PolicyValueModule(nn.Module):
         x = F.relu(self.conv3(x))
 
         # action policy
-        # pick stone 1
-        ap1_base = F.relu(self.ap_conv1(x))
-        ap1_base = ap1_base.view(-1, 4 * 9 * 9)
-        ap1 = F.log_softmax(self.ap_fc1(ap1_base))
+        # pick x & y
+        op = F.relu(self.op(x))
+        op = F.relu(self.xy(op))
+        op = F.relu(self.op_num(op))
+        op_final
+        direc_plus = F.log_softmax(self.direc_plus(op))
 
-        # pick stone 2 is base on ap1
-        ap2_base = F.relu(self.ap_conv2_base_on_v1(torch.cat([x] + [ap1]*128, dim=0)))
-        ap2 = F.log_softmax(self.ap_fc2(ap2_base))
-
-        # pick stone 3 is base on ap1 & ap2
-        ap3_base = F.relu(self.ap_conv3_base_on_v1v2(torch.cat([x] + [ap1]*128 + [ap2]*128), dim=0))
-        ap3 = F.log_softmax(self.ap_fc3(ap3_base))
-        # choose direction --> [[-1,0,1],[-1,0,1]]
-
-        # pick direc is base on ap1 & ap2 & ap3
-        ap_direc = F.relu(self.ap_direc_fc1(torch.cat((x, ap1, ap2, ap3), dim=0)))
-        ap_direc = F.relu(self.ap_direc_fc2(ap_direc))
 
         # state value
         sv = F.relu(self.sv_conv1(x))
-        sv = sv.view(-1, 2 * 9 * 9)
+        sv = sv.view(-1, 4 * 9 * 9)
         sv = F.relu(self.sv_fc1(sv))
         # F.tanh function for [-1,1] value output
         sv = F.tanh(self.sv_fc2(sv))

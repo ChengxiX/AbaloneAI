@@ -140,22 +140,8 @@ class Game:
                 ym = max(*[op[i * 2 + 2] for i in range(amount)])
             else:  # == 0
                 ym = op[2]
-            return xm, ym, dir, amount, 0
+            return xm, ym, dir, amount, 1
         # 平移
-        """        if op[0] == 0:
-                        dx, dy = 0, 1
-                    elif op[0] == 1:
-                        dx, dy = 0, -1
-                    elif op[0] == 2:
-                        dx, dy = 1, 1
-                    elif op[0] == 3:
-                        dx, dy = -1, -1
-                    elif op[0] == 4:
-                        dx, dy = 1, 0
-                    elif op[0] == 5:
-                        dx, dy = -1, 0
-                    else:
-                        raise InvalidDirection"""
         if place_dir == 0:
             xm = op[1]
             if dir in {2,5}:
