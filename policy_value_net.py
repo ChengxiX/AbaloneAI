@@ -9,8 +9,8 @@ torch.__version__: 1.12.1
 import numpy as np
 import torch
 import game
-import torch.nn as nn
-import torch.nn.functional as F
+from torch import nn as nn
+F =  nn.functional
 from torch.autograd import Variable as V
 
 print("cuda availability = {}".format(torch.cuda.is_available()))
@@ -47,11 +47,19 @@ class 方向(Enum):
 
 class op_version(tuple):
     op = (最后一个棋子的x, 最后一个棋子的y, 剩余棋子延展方向六选一class方向, num棋子的多少, 六选一的偏向)
-    六选一的偏向指如果偏左的平移就是0，不偏的推就是1，偏右的平移就是2
+    六选一的偏向指如果偏左的平移就是0, 不偏的推就是1, 偏右的平移就是2
 
 '''
-
-MAP_TABLE = [36,28,20,12,4,-4,-12,-20,-28,45,37,29,21,13,5,-3,-11,-19,54,46,38,30,22,14,6,-2,-10,63,55,47,39,31,23,15,7,-1,72,64,56,48,40,32,24,16,8,81,73,65,57,49,41,33,25,17,90,82,74,66,58,50,42,34,26,99,91,83,75,67,59,51,43,35,108,100,92,84,76,68,60,52,44]
+# 之前这个有问题, 下面改了:
+MAP_TABLE = [4, 14, 24, 34, 44, -1, -1, -1, -1,
+            3, 13, 23, 33, 43, 53, -1, -1, -1,
+            2, 12, 22, 32, 42, 52, 62, -1, -1,
+            1, 11, 21, 31, 41, 51, 61, 71, -1,
+            0, 10, 20, 30, 40, 50, 60, 70, 80,
+            -1, 9, 19, 29, 39, 49, 59, 69, 79,
+            -1, -1, 18, 28, 38, 48, 58, 68, 78,
+            -1, -1, -1, 27, 37, 47, 57, 67, 77,
+            -1, -1, -1, -1, 36, 46, 56, 66, 76]
 
 def convert_board(board, player):  # player:machine's side 0:white 1:black
     """
@@ -96,7 +104,7 @@ class PolicyValueModule(nn.Module):
         new = [0]*81
         for i in range(81):
             pos = MAP_TABLE[i]
-            if pos >=0:
+            if pos >= 0:
                 new[pos] = board[i]
         return new
 
@@ -134,7 +142,7 @@ class PolicyValueModule(nn.Module):
         # F.tanh function for [-1,1] value output
         sv = F.tanh(self.sv_fc2(sv))
 
-        return ap1, ap2, ap3, ap_direc, sv
+        return None
 
 
 class PolicyValueNet:
