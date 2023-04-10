@@ -44,14 +44,47 @@ class Game:
                       [0, 0, 1, 1, 2, 2, 2, 1, 1], [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
         self.dead = []
 
+    @classmethod
+    def convert_direction(cls, dir: int):
+        if dir == 0:
+            return (0, 1)
+        elif dir == 1:
+            return (0, -1)
+        elif dir == 2:
+            return (1, 1)
+        elif dir == 3:
+            return (-1, -1)
+        elif dir == 4:
+            return (1, 0)
+        elif dir == 5:
+            return (-1, 0)
+    
+    @classmethod
+    def convert_direction_2(cls, dir: tuple):
+        if dir == (0, 1):
+            return 0
+        elif dir == (0, -1):
+            return 1
+        elif dir == (1, 1):
+            return 2
+        elif dir == (-1, -1):
+            return 3
+        elif dir == (1, 0):
+            return 4
+        elif dir == (-1, 0):
+            return 5
+        else:
+            raise InvalidDirection
+
     def operate(self, player: int, op: tuple, test: bool = False):
-        """不验证一部分操作合法性"""
+        """不验证一部分操作合法性，接受human_long而不是long"""
         b = deepcopy(self.board)
         amount = len(op) // 2
 
         if amount != 1:
             dir = self.get_direction(op[1:])
-        if amount == 1 or not op[0] in {dir, dir + 1}:  # 单个走或者平移 # 寒假末在这里加了一个not，应该是最早的时候漏掉了
+        move_dir = self.convert_direction_2(op[0])
+        if amount == 1 or not (move_dir in {dir, dir + 1}):  # 单个走或者平移 # 寒假末在这里加了一个not，应该是最早的时候漏掉了
             try:
                 for i in range(amount):
                     if b[op[i * 2 + 1] + op[0][0]][op[i * 2 + 2] + op[0][1]] == 1:
@@ -108,20 +141,7 @@ class Game:
 
     @classmethod
     def convert_long_to_short(cls, op):
-        if op[0] == (0, 1):
-            dir = 0
-        elif op[0] == (0, -1):
-            dir = 1
-        elif op[0] == (1, 1):
-            dir = 2
-        elif op[0] == (-1, -1):
-            dir = 3
-        elif op[0] == (1, 0):
-            dir = 4
-        elif op[0] == (-1, 0):
-            dir = 5
-        else:
-            raise InvalidDirection
+        dir = cls.convert_direction_2(op[0])
         amount = len(op) // 2
         if amount == 1:
             return op[1], op[2], dir, 1  # 特例，只有一个
@@ -714,14 +734,34 @@ class Game:
             if len(down_add) > 1 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
         return result
+    
+    def display(self):
+        n = 10
+        for i in self.board:
+            n -= 1
+            print(n * " ", end="")
+            for j in i:
+                if j == 3:
+                    print("●", end=" ")
+                if j == 2:
+                    print("◎", end=" ")
+                if j == 1:
+                    print("◌", end=" ")
+                if j == 0:
+                    print(" ", end=" ")
+            print("")
 
 
 if __name__ == '__main__':
+    import random
     g = Game()
-    #g.board = [[3, 3, 3, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0, 0],
+    # g.board = [[3, 3, 3, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0, 0],
     #            [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
     #            [0, 0, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]
-    r = g.available_op(2)
-    #r.sort(key=lambda x: (x[0], len(x)))
-    #print(r)
-    print(len(r))
+    g.display()
+    for i in range(200):
+        choice = random.choice(g.available_op(2))
+        print(g.convert_long_to_short(choice))
+        print(choice)
+        g.operate(player=2, op=choice)
+        g.display()
