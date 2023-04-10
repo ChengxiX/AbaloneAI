@@ -269,7 +269,6 @@ class Game:
             return 1
 
     def available_op(self, player):
-        # 不是测试请替换给self.test_move前面加上#
         enemy = 2 if player == 3 else 3
         result = []
         for i in range(9):
@@ -793,6 +792,9 @@ class Game:
             if len(down_add) > 1 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
                 self.test_move(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
+
+        for op in result:
+            self.validate(player, op, True)
         return result
     
     def display(self):
