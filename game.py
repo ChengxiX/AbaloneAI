@@ -144,7 +144,7 @@ class Game:
         # 平移
         if place_dir == 0:
             xm = op[1]
-            if dir in {2,5}:
+            if dir in {2, 5}:
                 ym = min(*[op[i * 2 + 2] for i in range(amount)])
                 if dir == 2:
                     return xm, ym, 0, amount, 2
@@ -157,7 +157,7 @@ class Game:
                 else:
                     return xm, ym, 1, amount, 0
         elif place_dir == 2:
-            if dir in {0,4}:
+            if dir in {0, 4}:
                 xm = min(*[op[i * 2 + 1] for i in range(amount)])
                 ym = min(*[op[i * 2 + 2] for i in range(amount)])
                 if dir == 4:
@@ -683,8 +683,8 @@ class Game:
                     result.append(((-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1]))
                     if len(up) > 2 and up[k + 2] == up[k + 1] + 1:
                         result.append((
-                                      (-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1], offset + up[k + 2],
-                                      up[k + 2]))
+                            (-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1], offset + up[k + 2],
+                            up[k + 2]))
             if len(up) > 1 and up[-2] + 1 == up[-1]:
                 result.append(((-1, 0), offset + up[-2], up[-2], offset + up[-1], up[-1]))
             for k in range(len(up_minus) - 2):
@@ -715,13 +715,36 @@ class Game:
                 result.append(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
         return result
 
+    def display(self):
+        n = 10
+        for i in self.board:
+            n -= 1
+            print(n * " ", end="")
+            for j in i:
+                if j == 3:
+                    print("●", end=" ")
+                if j == 2:
+                    print("◎", end=" ")
+                if j == 1:
+                    print("◌", end=" ")
+                if j == 0:
+                    print(" ", end=" ")
+            print("")
+
 
 if __name__ == '__main__':
+    import random
+
     g = Game()
-    #g.board = [[3, 3, 3, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0, 0],
+    # g.board = [[3, 3, 3, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0, 0],
     #            [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
     #            [0, 0, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]
-    r = g.available_op(2)
-    #r.sort(key=lambda x: (x[0], len(x)))
-    #print(r)
-    print(len(r))
+    g.display()
+    for i in range(200):
+        choice = random.choice(g.available_op(2))
+        print(g.convert_long_to_short(choice))
+        g.operate(player=2, op=choice)
+        g.display()
+    # r.sort(key=lambda x: (x[0], len(x)))
+    # print(r)
+    # print(r)
