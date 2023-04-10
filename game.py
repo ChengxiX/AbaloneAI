@@ -367,6 +367,8 @@ class Game:
                     elif last == 1:
                         reverse = 1
                         conti_e = 1
+                    elif last == 0:
+                        conti_e = 1
                 elif self.board[i][j] == 1:
                     if last == player:
                         for k in range(1, min(conti_p, 3) + 1):  # 正向推空气
@@ -538,6 +540,8 @@ class Game:
                         reverse = 1
                         conti_e = 1
                     # elif last 是边界，棋盘外面！
+                    elif last == 0:
+                        conti_e = 1
                 elif self.board[j][i] == 1:
                     if last == player:
                         for k in range(1, min(conti_p, 3) + 1):  # 正向推空气
@@ -711,6 +715,8 @@ class Game:
                         conti_e = 1
                     elif last == 1:
                         reverse = 1
+                        conti_e = 1
+                    elif last == 0:
                         conti_e = 1
                 elif self.board[j + offset][j] == 1:
                     if last == player:
