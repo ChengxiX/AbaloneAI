@@ -227,7 +227,7 @@ class Game:
     def commit(self, b):
         self.board = b
 
-    def validate(self, player, op):
+    def validate(self, player, op, test:bool = False):
         """验证合法性，主要是1.棋子都是己方的，数量小于4 2.棋子都在一条线上且挨着"""
         if not len(op) in {3, 5, 7}:
             raise InvalidOperation
@@ -246,23 +246,15 @@ class Game:
             if pairs[1][0] - pairs[2][0] != dx or pairs[1][1] - pairs[2][1] != dy:
                 raise InvalidOperation
         for i in range(len(op) // 2):
-            if self.board[i * 2 + 1][i * 2 + 2] != player:
+            if self.board[op[i * 2 + 1]][op[i * 2 + 2]] != player:
                 raise InvalidOperation
-        if op[0] == 0:
-            dx, dy = 0, 1
-        elif op[0] == 1:
-            dx, dy = 0, -1
-        elif op[0] == 2:
-            dx, dy = 1, 1
-        elif op[0] == 3:
-            dx, dy = -1, -1
-        elif op[0] == 4:
-            dx, dy = 1, 0
-        elif op[0] == 5:
-            dx, dy = -1, 0
+        if type(op[0]) == int:
+            dir = self.convert_direction(op[0])
+        elif type(op[0]) ==  tuple:
+            dir = op[0]
         else:
-            raise InvalidDirection
-        return self.operate(player, tuple([(dx, dy)] + op[1:]))
+            raise
+        return self.operate(player, (dir,) + op[1:], test=test)
 
     def judge(self):
         """返回2是黑棋输了，返回3是白棋输了，返回1是没有结束"""
@@ -733,6 +725,11 @@ class Game:
                                        down_add[k + 1], down_add[k + 2] + offset, down_add[k + 2]))
             if len(down_add) > 1 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
+        try:
+            for op in result:
+                self.validate(player, op, True)
+        except CannotGo:
+            raise CannotGo
         return result
     
     def display(self):
