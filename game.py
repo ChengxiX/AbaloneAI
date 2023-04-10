@@ -44,8 +44,8 @@ class Game:
                       [0, 0, 1, 1, 2, 2, 2, 1, 1], [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
         self.dead = []
 
-    def test_move(self, op):
-        self.validate(2, op, True)
+    def test_move(self, player, op):
+        self.validate(player, op, True)
 
     @classmethod
     def convert_direction(cls, dir: int):
@@ -268,8 +268,8 @@ class Game:
         else:
             return 1
 
-    def available_op(self, player):
-        # 不是测试请替换给self.test_move前面加上#
+    def available_op(self, player, test=False):
+        # 测试时list_type修改append方法
         enemy = 2 if player == 3 else 3
         result = []
         for i in range(9):
@@ -285,7 +285,7 @@ class Game:
                             for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
                                 res += [i, l]
                             result.append(tuple(res))
-                            self.test_move(tuple(res))
+                            if test: self.test_move(player, tuple(res))
                     elif last == player:
                         if reverse == 1:
                             # 反向推空气
@@ -294,7 +294,7 @@ class Game:
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [i, l]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif reverse == enemy:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
@@ -303,7 +303,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [i, l]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                     if j == 9:
                         break
                 elif self.board[i][j] == player:
@@ -352,7 +352,7 @@ class Game:
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [i, l]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif reverse == enemy:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
@@ -361,7 +361,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [i, l]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                         reverse = player
                         conti_e = 1
                     elif last == 1:
@@ -376,14 +376,14 @@ class Game:
                             for l in range(j - min(conti_p, 3), j)[-k:]:
                                 res += [i, l]
                             result.append(tuple(res))
-                            self.test_move(tuple(res))
+                            if test: self.test_move(player, tuple(res))
                         if reverse == 1:  # 反向推空气
                             for k in range(1, min(conti_p, 3) + 1):
                                 res = [(0, -1)]
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [i, l]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif reverse == enemy:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
@@ -392,7 +392,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [i, l]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                     elif last == enemy:
                         if conti_p > conti_e and conti_e < 3 and reverse == player:
                             for k in range(conti_e + 1, min(conti_p, 3) + 1):
@@ -400,49 +400,49 @@ class Game:
                                 for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
                                     res += [i, l]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                     conti_p, conti_e = 0, 0
                 last = self.board[i][j]
             for k in range(len(up) - 2):
                 if up[k + 1] == up[k] + 1:
                     result.append(((-1, 0), i, up[k], i, up[k + 1]))
-                    self.test_move(((-1, 0), i, up[k], i, up[k + 1]))
+                    if test: self.test_move(player, ((-1, 0), i, up[k], i, up[k + 1]))
                     if len(up) > 2 and up[k + 2] == up[k + 1] + 1:
                         result.append(((-1, 0), i, up[k], i, up[k + 1], i, up[k + 2]))
-                        self.test_move(((-1, 0), i, up[k], i, up[k + 1], i, up[k + 2]))
+                        if test: self.test_move(player, ((-1, 0), i, up[k], i, up[k + 1], i, up[k + 2]))
             if len(up) > 1 and up[-2] + 1 == up[-1]:
                 result.append(((-1, 0), i, up[-2], i, up[-1]))
-                self.test_move(((-1, 0), i, up[-2], i, up[-1]))
+                if test: self.test_move(player, ((-1, 0), i, up[-2], i, up[-1]))
             for k in range(len(up_minus) - 2):
                 if up_minus[k + 1] == up_minus[k] + 1:
                     result.append(((-1, -1), i, up_minus[k], i, up_minus[k + 1]))
-                    self.test_move(((-1, -1), i, up_minus[k], i, up_minus[k + 1]))
+                    if test: self.test_move(player, ((-1, -1), i, up_minus[k], i, up_minus[k + 1]))
                     if len(up_minus) > 2 and up_minus[k + 2] == up_minus[k + 1] + 1:
                         result.append(((-1, -1), i, up_minus[k], i, up_minus[k + 1], i, up_minus[k + 2]))
-                        self.test_move(((-1, -1), i, up_minus[k], i, up_minus[k + 1], i, up_minus[k + 2]))
+                        if test: self.test_move(player, ((-1, -1), i, up_minus[k], i, up_minus[k + 1], i, up_minus[k + 2]))
             if len(up_minus) > 1 and up_minus[-2] + 1 == up_minus[-1]:
                 result.append(((-1, -1), i, up_minus[-2], i, up_minus[-1]))
-                self.test_move(((-1, -1), i, up_minus[-2], i, up_minus[-1]))
+                if test: self.test_move(player, ((-1, -1), i, up_minus[-2], i, up_minus[-1]))
             for k in range(len(down) - 2):
                 if down[k + 1] == down[k] + 1:
                     result.append(((1, 0), i, down[k], i, down[k + 1]))
-                    self.test_move(((1, 0), i, down[k], i, down[k + 1]))
+                    if test: self.test_move(player, ((1, 0), i, down[k], i, down[k + 1]))
                     if len(down) > 2 and down[k + 2] == down[k + 1] + 1:
                         result.append(((1, 0), i, down[k], i, down[k + 1], i, down[k + 2]))
-                        self.test_move(((1, 0), i, down[k], i, down[k + 1], i, down[k + 2]))
+                        if test: self.test_move(player, ((1, 0), i, down[k], i, down[k + 1], i, down[k + 2]))
             if len(down) > 1 and down[-2] + 1 == down[-1]:
                 result.append(((1, 0), i, down[-2], i, down[-1]))
-                self.test_move(((1, 0), i, down[-2], i, down[-1]))
+                if test: self.test_move(player, ((1, 0), i, down[-2], i, down[-1]))
             for k in range(len(down_add) - 2):
                 if down_add[k + 1] == down_add[k] + 1:
                     result.append(((1, 1), i, down_add[k], i, down_add[k + 1]))
-                    self.test_move(((1, 1), i, down_add[k], i, down_add[k + 1]))
+                    if test: self.test_move(player, ((1, 1), i, down_add[k], i, down_add[k + 1]))
                     if len(down_add) > 2 and down_add[k + 2] == down_add[k + 1] + 1:
                         result.append(((1, 1), i, down_add[k], i, down_add[k + 1], i, down_add[k + 2]))
-                        self.test_move(((1, 1), i, down_add[k], i, down_add[k + 1], i, down_add[k + 2]))
+                        if test: self.test_move(player, ((1, 1), i, down_add[k], i, down_add[k + 1], i, down_add[k + 2]))
             if len(down_add) > 1 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((1, 1), i, down_add[-2], i, down_add[-1]))
-                self.test_move(((1, 1), i, down_add[-2], i, down_add[-1]))
+                if test: self.test_move(player, ((1, 1), i, down_add[-2], i, down_add[-1]))
         # 4和5的方向
         for i in range(9):
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
@@ -457,7 +457,7 @@ class Game:
                             for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
                                 res += [l, i]
                             result.append(tuple(res))
-                            self.test_move(tuple(res))
+                            if test: self.test_move(player, tuple(res))
                     elif last == player:
                         if reverse == 1:
                             # 反向推空气
@@ -466,7 +466,7 @@ class Game:
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [l, i]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif reverse == enemy:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
@@ -475,7 +475,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [l, i]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                     if j == 9:
                         break
                 elif self.board[j][i] == player:
@@ -524,7 +524,7 @@ class Game:
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [l, i]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif reverse == enemy:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
@@ -533,7 +533,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [l, i]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                         reverse = player
                         conti_e = 1
                     elif last == 1:
@@ -549,14 +549,14 @@ class Game:
                             for l in range(j - min(conti_p, 3), j)[-k:]:
                                 res += [l, i]
                             result.append(tuple(res))
-                            self.test_move(tuple(res))
+                            if test: self.test_move(player, tuple(res))
                         if reverse == 1:  # 反向推空气
                             for k in range(1, min(conti_p, 3) + 1):
                                 res = [(-1, 0)]
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [l, i]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif reverse == enemy:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
@@ -565,7 +565,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [l, i]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                     elif last == enemy:
                         if conti_p > conti_e and conti_e < 3 and reverse == player:
                             for k in range(conti_e + 1, min(conti_p, 3) + 1):
@@ -573,49 +573,49 @@ class Game:
                                 for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
                                     res += [l, i]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                     conti_p, conti_e = 0, 0
                 last = self.board[j][i]
             for k in range(len(up) - 2):
                 if up[k + 1] == up[k] + 1:
                     result.append(((0, -1), up[k], i, up[k + 1], i))
-                    self.test_move(((0, -1), up[k], i, up[k + 1], i))
+                    if test: self.test_move(player, ((0, -1), up[k], i, up[k + 1], i))
                     if len(up) > 2 and up[k + 2] == up[k + 1] + 1:
                         result.append(((0, -1), up[k], i, up[k + 1], i, up[k + 2], i))
-                        self.test_move(((0, -1), up[k], i, up[k + 1], i, up[k + 2], i))
+                        if test: self.test_move(player, ((0, -1), up[k], i, up[k + 1], i, up[k + 2], i))
             if len(up) > 1 and up[-2] + 1 == up[-1]:
                 result.append(((0, -1), up[-2], i, up[-1], i))
-                self.test_move(((0, -1), up[-2], i, up[-1], i))
+                if test: self.test_move(player, ((0, -1), up[-2], i, up[-1], i))
             for k in range(len(up_minus) - 2):
                 if up_minus[k + 1] == up_minus[k] + 1:
                     result.append(((-1, -1), up_minus[k], i, up_minus[k + 1], i))
-                    self.test_move(((-1, -1), up_minus[k], i, up_minus[k + 1], i))
+                    if test: self.test_move(player, ((-1, -1), up_minus[k], i, up_minus[k + 1], i))
                     if len(up_minus) > 2 and up_minus[k + 2] == up_minus[k + 1] + 1:
                         result.append(((-1, -1), up_minus[k], i, up_minus[k + 1], i, up_minus[k + 2], i))
-                        self.test_move(((-1, -1), up_minus[k], i, up_minus[k + 1], i, up_minus[k + 2], i))
+                        if test: self.test_move(player, ((-1, -1), up_minus[k], i, up_minus[k + 1], i, up_minus[k + 2], i))
             if len(up_minus) > 1 and up_minus[-2] + 1 == up_minus[-1]:
                 result.append(((-1, -1), up_minus[-2], i, up_minus[-1], i))
-                self.test_move(((-1, -1), up_minus[-2], i, up_minus[-1], i))
+                if test: self.test_move(player, ((-1, -1), up_minus[-2], i, up_minus[-1], i))
             for k in range(len(down) - 2):
                 if down[k + 1] == down[k] + 1:
                     result.append(((0, 1), down[k], i, down[k + 1], i))
-                    self.test_move(((0, 1), down[k], i, down[k + 1], i))
+                    if test: self.test_move(player, ((0, 1), down[k], i, down[k + 1], i))
                     if len(down) > 2 and down[k + 2] == down[k + 1] + 1:
                         result.append(((0, 1), down[k], i, down[k + 1], i, down[k + 2], i))
-                        self.test_move(((0, 1), down[k], i, down[k + 1], i, down[k + 2], i))
+                        if test: self.test_move(player, ((0, 1), down[k], i, down[k + 1], i, down[k + 2], i))
             if len(down) > 1 and down[-2] + 1 == down[-1]:
                 result.append(((0, 1), down[-2], i, down[-1], i))
-                self.test_move(((0, 1), down[-2], i, down[-1], i))
+                if test: self.test_move(player, ((0, 1), down[-2], i, down[-1], i))
             for k in range(len(down_add) - 2):
                 if down_add[k + 1] == down_add[k] + 1:
                     result.append(((1, 1), down_add[k], i, down_add[k + 1], i))
-                    self.test_move(((1, 1), down_add[k], i, down_add[k + 1], i))
+                    if test: self.test_move(player, ((1, 1), down_add[k], i, down_add[k + 1], i))
                     if len(down_add) > 2 and down_add[k + 2] == down_add[k + 1] + 1:
                         result.append(((1, 1), down_add[k], i, down_add[k + 1], i, down_add[k + 2], i))
-                        self.test_move(((1, 1), down_add[k], i, down_add[k + 1], i, down_add[k + 2], i))
+                        if test: self.test_move(player, ((1, 1), down_add[k], i, down_add[k + 1], i, down_add[k + 2], i))
             if len(down_add) > 1 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((1, 1), down_add[-2], i, down_add[-1], i))
-                self.test_move(((1, 1), down_add[-2], i, down_add[-1], i))
+                if test: self.test_move(player, ((1, 1), down_add[-2], i, down_add[-1], i))
         # 2和3的方向
         for offset in range(-4, 5):
             conti_p, conti_e, reverse, last = 0, 0, 0, 0
@@ -635,7 +635,7 @@ class Game:
                                 for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
                                     res += [l + offset, l]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif last == player:
                             if reverse == 1:
                                 # 反向推空气
@@ -644,7 +644,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [l + offset, l]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                             elif reverse == enemy:
                                 # 反向推敌方
                                 if conti_p > conti_e and conti_e < 3:
@@ -653,7 +653,7 @@ class Game:
                                         for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                             res += [l + offset, l]
                                         result.append(tuple(res))
-                                        self.test_move(tuple(res))
+                                        if test: self.test_move(player, tuple(res))
                         break
                 if self.board[j + offset][j] == player:
                     if last == 1:
@@ -701,7 +701,7 @@ class Game:
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [l + offset, l]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif reverse == enemy:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
@@ -710,7 +710,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [l + offset, l]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                         reverse = player
                         conti_e = 1
                     elif last == 1:
@@ -725,14 +725,14 @@ class Game:
                             for l in range(j - min(conti_p, 3), j)[-k:]:
                                 res += [l + offset, l]
                             result.append(tuple(res))
-                            self.test_move(tuple(res))
+                            if test: self.test_move(player, tuple(res))
                         if reverse == 1:  # 反向推空气
                             for k in range(1, min(conti_p, 3) + 1):
                                 res = [(-1, -1)]
                                 for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                     res += [l + offset, l]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                         elif reverse == enemy:
                             # 反向推敌方
                             if conti_p > conti_e and conti_e < 3:
@@ -741,7 +741,7 @@ class Game:
                                     for l in range(j - conti_p, j - conti_p + min(conti_p, 3))[:k]:
                                         res += [l + offset, l]
                                     result.append(tuple(res))
-                                    self.test_move(tuple(res))
+                                    if test: self.test_move(player, tuple(res))
                     elif last == enemy:
                         if conti_p > conti_e and conti_e < 3 and reverse == player:
                             for k in range(conti_e + 1, min(conti_p, 3) + 1):
@@ -749,20 +749,20 @@ class Game:
                                 for l in range(j - min(conti_p, 3) - conti_e, j - conti_e)[- k:]:
                                     res += [l + offset, l]
                                 result.append(tuple(res))
-                                self.test_move(tuple(res))
+                                if test: self.test_move(player, tuple(res))
                     conti_p, conti_e = 0, 0
                 last = self.board[j + offset][j]
             for k in range(len(up) - 2):
                 if up[k + 1] == up[k] + 1:
                     result.append(((-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1]))
-                    self.test_move(((-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1]))
+                    if test: self.test_move(player, ((-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1]))
                     if len(up) > 2 and up[k + 2] == up[k + 1] + 1:
                         result.append((
                             (-1, 0), offset + up[k], up[k], offset + up[k + 1], up[k + 1], offset + up[k + 2],
                             up[k + 2]))
             if len(up) > 1 and up[-2] + 1 == up[-1]:
                 result.append(((-1, 0), offset + up[-2], up[-2], offset + up[-1], up[-1]))
-                self.test_move(((-1, 0), offset + up[-2], up[-2], offset + up[-1], up[-1]))
+                if test: self.test_move(player, ((-1, 0), offset + up[-2], up[-2], offset + up[-1], up[-1]))
             for k in range(len(up_minus) - 2):
                 if up_minus[k + 1] == up_minus[k] + 1:
                     result.append(
@@ -770,23 +770,23 @@ class Game:
                     if len(up_minus) > 2 and up_minus[k + 2] == up_minus[k + 1] + 1:
                         result.append(((0, 1), up_minus[k] + offset, up_minus[k], up_minus[k + 1] + offset,
                                        up_minus[k + 1], up_minus[k + 2] + offset, up_minus[k + 2]))
-                        self.test_move(((0, 1), up_minus[k] + offset, up_minus[k], up_minus[k + 1] + offset,
+                        if test: self.test_move(player, ((0, 1), up_minus[k] + offset, up_minus[k], up_minus[k + 1] + offset,
                                        up_minus[k + 1], up_minus[k + 2] + offset, up_minus[k + 2]))
             if len(up_minus) > 1 and up_minus[-2] + 1 == up_minus[-1]:
                 result.append(((0, 1), up_minus[-2] + offset, up_minus[-2], up_minus[-1] + offset, up_minus[-1]))
-                self.test_move(((0, 1), up_minus[-2] + offset, up_minus[-2], up_minus[-1] + offset, up_minus[-1]))
+                if test: self.test_move(player, ((0, 1), up_minus[-2] + offset, up_minus[-2], up_minus[-1] + offset, up_minus[-1]))
             for k in range(len(down) - 2):
                 if down[k + 1] == down[k] + 1:
                     result.append(((1, 0), down[k] + offset, down[k], down[k + 1] + offset, down[k + 1]))
-                    self.test_move(((1, 0), down[k] + offset, down[k], down[k + 1] + offset, down[k + 1]))
+                    if test: self.test_move(player, ((1, 0), down[k] + offset, down[k], down[k + 1] + offset, down[k + 1]))
                     if len(down) > 2 and down[k + 2] == down[k + 1] + 1:
                         result.append(((1, 0), down[k] + offset, down[k], down[k + 1] + offset, down[k + 1],
                                        down[k + 2] + offset, down[k + 2]))
-                        self.test_move(((1, 0), down[k] + offset, down[k], down[k + 1] + offset, down[k + 1],
+                        if test: self.test_move(player, ((1, 0), down[k] + offset, down[k], down[k + 1] + offset, down[k + 1],
                                        down[k + 2] + offset, down[k + 2]))
             if len(down) > 1 and down[-2] + 1 == down[-1]:
                 result.append(((1, 0), down[-2] + offset, down[-2], down[-1] + offset, down[-1]))
-                self.test_move(((1, 0), down[-2] + offset, down[-2], down[-1] + offset, down[-1]))
+                if test: self.test_move(player, ((1, 0), down[-2] + offset, down[-2], down[-1] + offset, down[-1]))
             for k in range(len(down_add) - 2):
                 if down_add[k + 1] == down_add[k] + 1:
                     result.append(
@@ -794,11 +794,11 @@ class Game:
                     if len(down_add) > 2 and down_add[k + 2] == down_add[k + 1] + 1:
                         result.append(((0, -1), down_add[k] + offset, down_add[k], down_add[k + 1] + offset,
                                        down_add[k + 1], down_add[k + 2] + offset, down_add[k + 2]))
-                        self.test_move(((0, -1), down_add[k] + offset, down_add[k], down_add[k + 1] + offset,
-                                       down_add[k + 1], down_add[k + 2] + offset, down_add[k + 2]))
+                        if test: self.test_move((player, (0, -1), down_add[k] + offset, down_add[k], down_add[k + 1] + offset,
+                                      down_add[k + 1], down_add[k + 2] + offset, down_add[k + 2]))
             if len(down_add) > 1 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
-                self.test_move(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
+                if test: self.test_move(player, ((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
         return result
     
     def display(self):
@@ -832,19 +832,3 @@ class Game:
                 if j == 0:
                     print(" ", end=" ")
             print("")
-
-
-if __name__ == '__main__':
-    import random
-    random.seed(1)
-    g = Game()
-    # g.board = [[3, 3, 3, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0, 0],
-    #            [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
-    #            [0, 0, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]
-    g.display()
-    for i in range(200):
-        choice = random.choice(g.available_op(2))
-        print(g.convert_long_to_short(choice))
-        print(choice)
-        g.operate(player=2, op=choice)
-        g.display()
