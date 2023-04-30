@@ -1,165 +1,133 @@
-import numpy as np
-import copy
-from operator import itemgetter
+from abc import ABC, abstractmethod
+from collections import defaultdict
+import game
+import math
 
 
-"""for pure MCTS without a policy-value network"""
+class MCTS:
+    "Monte Carlo tree searcher. First rollout the tree then choose a move."
 
+    def __init__(self, exploration_weight=1):
+        self.Q = defaultdict(int)  # total reward of each node
+        self.N = defaultdict(int)  # total visit count for each node
+        self.children = dict()  # children of each node
+        self.exploration_weight = exploration_weight
 
-def rollout_policy_fn(board):
-    """a coarse, fast version of policy_fn used in the rollout phase."""
-    # rollout randomly
-    action_probs = np.random.rand(len(board.availables))
-    return zip(board.availables, action_probs)
+    def choose(self, node):
+        "Choose the best successor of node. (Choose a move in the game)"
+        if node.is_terminal():
+            raise RuntimeError(f"choose called on terminal node {node}")
 
+        if node not in self.children:
+            return node.find_random_child()
 
-def policy_value_fn(board):
-    """outputs a list of (action, probability) tuples and a score for the state"""
-    # return uniform probabilities and 0 score for pure MCTS
-    # sum(action_probs) = 1
-    action_probs = np.ones(len(board.availables)) / len(board.availables)
-    return zip(board.availables, action_probs), 0
+        def score(n):
+            if self.N[n] == 0:
+                return float("-inf")  # avoid unseen moves
+            return self.Q[n] / self.N[n]  # average reward
 
+        return max(self.children[node], key=score)
 
-class TreeNode:
-    def __init__(self, parent, prior_p):
-        self._parent = parent  # parent node
-        self._children = {}  # children nodes --> key: action item: children node
-        self._n_visits = 0  # quantity of visits
-        self._Q = 0  # quality
-        self._u = 0  # UCB
-        self._P = prior_p  # probability in MCTS._policy()
+    def do_rollout(self, node):
+        "Make the tree one layer better. (Train for one iteration.)"
+        path = self._select(node)
+        leaf = path[-1]
+        self._expand(leaf)
+        reward = self._simulate(leaf)
+        self._backpropagate(path, reward)
 
-    def get_value(self, c_puct):
-        """c_puct: a number in (0, inf) for bias.
-        """
-        self._u = (c_puct * self._P *
-                   np.sqrt(self._parent._n_visits) / (1 + self._n_visits))
-        return self._Q + self._u
-
-    def select(self, c_puct):
-        return max(self._children.items(),
-                   key=lambda node: node[1].get_value(c_puct))
-
-    def expand(self, action_priors):
-        for action, prob in action_priors:
-            if action not in self._children:
-                self._children[action] = TreeNode(self, prob)
-
-    def update(self, leaf_value):
-        self._n_visits += 1
-        self._Q += leaf_value - self._Q / self._n_visits
-        # _Q = sum(leaf_values) / _n_visits
-
-    # fathers update
-    def update_recursive(self, leaf_value):
-        self.update(leaf_value)
-        if self._parent:
-            self._parent.update_recursive(-leaf_value)  # "-" for opponent
-
-    def is_leaf(self):
-        """Check if leaf node (i.e. no nodes below this have been expanded).
-        """
-        return self._children == {}
-
-    def is_root(self):
-        return self._parent is None
-
-
-class MCTS(object):
-    """implementation of MCTS"""
-
-    def __init__(self, policy_value_fn, c_puct=5, n_playout=500):
-        """
-        policy_value_fn: a function that takes in a board state and outputs
-            a list of (action, probability) tuples and also a score in [-1, 1]
-            (i.e. the expected value of the end game score from the current
-            player's perspective).
-        c_puct: a number in (0, inf) for bias. A higher value means relying
-            on the prior more.
-        """
-        self._root = TreeNode(None, 1.0)  # init root
-        self._policy = policy_value_fn
-        self._c_puct = c_puct  # bias for TreeNode.get_value
-        self._n_playout = n_playout  # playout times
-
-    def _playout(self, state):
-        node = self._root
-
-        # ===select=====
+    def _select(self, node):
+        "Find an unexplored descendent of `node`"
+        path = []
         while True:
-            if node.is_leaf():
-                break
-            # select a children based on max(Q+u)
-            action, node = node.select(self._c_puct)
-            state.move(action)
+            path.append(node)
+            if node not in self.children or not self.children[node]:
+                # node is either unexplored or terminal
+                return path
+            unexplored = self.children[node] - self.children.keys()
+            if unexplored:
+                n = unexplored.pop()
+                path.append(n)
+                return path
+            node = self._uct_select(node)  # descend a layer deeper
 
-        # ===Evaluate===
-        action_probs, _ = self._policy(state)
+    def _expand(self, node):
+        "Update the `children` dict with the children of `node`"
+        if node in self.children:
+            return  # already expanded
+        self.children[node] = node.find_children()
 
-        # ===expand=====
-        end, winner = state.game_end()
-        if not end:
-            node.expand(action_probs)
+    def _simulate(self, node):
+        "Returns the reward for a random simulation (to completion) of `node`"
+        invert_reward = True
+        while True:
+            if node.is_terminal():
+                reward = node.reward()
+                return 1 - reward if invert_reward else reward
+            node = node.find_random_child()
+            invert_reward = not invert_reward
 
-        # Evaluate the leaf node by random rollout
-        leaf_value = self._evaluate_rollout(state)
+    def _backpropagate(self, path, reward):
+        "Send the reward back up to the ancestors of the leaf"
+        for node in reversed(path):
+            self.N[node] += 1
+            self.Q[node] += reward
+            reward = 1 - reward  # 1 for me is 0 for my enemy, and vice versa
 
-        # update fathers
-        node.update_recursive(-leaf_value)
+    def _uct_select(self, node):
+        "Select a child of node, balancing exploration & exploitation"
 
-    def _evaluate_rollout(self, state, limit=1000):  # limit
-        """Use the rollout policy to play until the end of the game,
-        returning +1 if the current player wins, -1 if the opponent wins,
-        and 0 if it is a tie.
-        """
-        player = state.get_current_player()
-        for i in range(limit):
-            end, winner = state.game_end()
-            if end:
-                break
-            action_probs = rollout_policy_fn(state)
-            max_action = max(action_probs, key=itemgetter(1))[0]
-            state.do_move(max_action)
-        else:
-            # If no break from the loop, issue a warning.
-            print("WARNING: rollout reached move limit")
-        if winner == -1:  # tie
-            return 0
-        else:
-            return 1 if winner == player else -1
+        # All children of node should already be expanded:
+        assert all(n in self.children for n in self.children[node])
 
-    def get_move(self, state):
-        """state: the current game state Return: the selected action"""
-        for n in range(self._n_playout):
-            state_copy = copy.deepcopy(state)
-            self._playout(state_copy)
-        return max(self._root._children.items(),
-                   key=lambda act_node: act_node[1]._n_visits)[0]
+        log_N_vertex = math.log(self.N[node])
 
-    def update_with_move(self, last_move):
-        if last_move in self._root._children:
-            self._root = self._root._children[last_move]
-            self._root._parent = None
-        else:
-            self._root = TreeNode(None, 1.0)
+        def uct(n):
+            "Upper confidence bound for trees"
+            return self.Q[n] / self.N[n] + self.exploration_weight * math.sqrt(
+                log_N_vertex / self.N[n]
+            )
+
+        return max(self.children[node], key=uct)
 
 
-class MCTSPlayer(object):
-    """AI player based on MCTS"""
+class Node(ABC):
+    """
+    A representation of a single board state.
+    MCTS works by constructing a tree of these Nodes.
+    Could be e.g. a chess or checkers board state.
+    """
 
-    def __init__(self, c_puct=5, n_playout=2000, p='MCTS-AI'):
-        self.player = p
-        self.mcts = MCTS(policy_value_fn, c_puct, n_playout)
+    @abstractmethod
+    def find_children(self):
+        # 所有孩子
+        "All possible successors of this board state"
+        return set()
 
-    def reset_player(self):
-        self.mcts.update_with_move(-1)
+    @abstractmethod
+    def find_random_child(self):
+        #随机孩子
+        "Random successor of this board state (for more efficient simulation)"
+        return None
 
-    def get_action(self, board):
-        sensible_moves = board.availables
-        if len(sensible_moves) > 0:
-            move = self.mcts.get_move(board)
-            self.mcts.update_with_move(-1)
-            return move
-        else:
-            print("WARNING: the board is full")
+    @abstractmethod
+    def is_terminal(self):
+        #是否无孩子
+        "Returns True if the node has no children"
+        return True
+
+    @abstractmethod
+    def reward(self):
+        #是否赢了
+        "Assumes `self` is terminal node. 1=win, 0=loss, .5=tie, etc"
+        return 0
+
+    @abstractmethod
+    def __hash__(self):
+        "Nodes must be hashable"
+        return 123456789
+
+    @abstractmethod
+    def __eq__(node1, node2):
+        "Nodes must be comparable"
+        return True

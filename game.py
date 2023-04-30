@@ -848,3 +848,9 @@ if __name__ == '__main__':
         print(choice)
         g.operate(player=2, op=choice)
         g.display()
+
+        choice = random.choice(g.available_op(3))
+        print(g.convert_long_to_short(choice))
+        print(choice)
+        g.operate(player=3, op=choice)
+        g.display()
