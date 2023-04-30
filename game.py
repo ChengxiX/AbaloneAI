@@ -794,7 +794,7 @@ class Game:
                     if len(down_add) > 2 and down_add[k + 2] == down_add[k + 1] + 1:
                         result.append(((0, -1), down_add[k] + offset, down_add[k], down_add[k + 1] + offset,
                                        down_add[k + 1], down_add[k + 2] + offset, down_add[k + 2]))
-                        if test: self.test_move((player, (0, -1), down_add[k] + offset, down_add[k], down_add[k + 1] + offset,
+                        if test: self.test_move(player, ((0, -1), down_add[k] + offset, down_add[k], down_add[k + 1] + offset,
                                       down_add[k + 1], down_add[k + 2] + offset, down_add[k + 2]))
             if len(down_add) > 1 and down_add[-2] + 1 == down_add[-1]:
                 result.append(((0, -1), down_add[-2] + offset, down_add[-2], down_add[-1] + offset, down_add[-1]))
