@@ -120,11 +120,9 @@ def operate(board, player: int, op: tuple, test: bool = False):
                     2 if player == 3 else 3):
                 enemy_amount += 1
         except IndexError:
-            '''
             if amount > enemy_amount > 0:
-                self.dead.append(2 if player == 3 else 3)
-            el'''
-            if enemy_amount >= amount:
+                pass
+            elif enemy_amount >= amount:
                 raise CannotPush
             else:
                 raise CannotGo
