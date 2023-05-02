@@ -91,7 +91,10 @@ class MCTS:
         return max(self.children[node], key=uct)
 
 
-class Node(ABC):
+class Node(game.Game):
+    def __init__(self, board):
+        self.board = board
+
     """
     A representation of a single board state.
     MCTS works by constructing a tree of these Nodes.
@@ -102,7 +105,7 @@ class Node(ABC):
     def find_children(self):
         # 所有孩子
         "All possible successors of this board state"
-        return set()
+        return self.board
 
     @abstractmethod
     def find_random_child(self):
