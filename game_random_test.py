@@ -1,29 +1,28 @@
-import game
+from game import *
 import random
 import time
 
 if __name__ == '__main__':
     random.seed(1)
-    g = game.Game()
-    # g.board = [[3, 3, 3, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0, 0],
-    #            [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
-    #            [0, 0, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 1, 1, 1, 1]]
-    g.display()
+    board = [[3, 3, 3, 3, 3, 0, 0, 0, 0], [3, 3, 3, 3, 3, 3, 0, 0, 0], [1, 1, 3, 3, 3, 1, 1, 0, 0],
+             [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
+             [0, 0, 1, 1, 2, 2, 2, 1, 1], [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
+    display(board)
 
     a = time.time()
     for i in range(10000):
         # print(i)
-        choice = random.choice(g.available_op(2))
-        # print(g.convert_long_to_short(choice))
+        choice = random.choice(available_op(board, 2))
+        # print(convert_long_to_short(choice))
         # print(choice)
-        g.operate(player=2, op=choice)
-        # g.display()
+        board = operate(board, player=2, op=choice)
+        # display(board)
 
-        choice = random.choice(g.available_op(3))
-        # print(g.convert_long_to_short(choice))
+        choice = random.choice(available_op(board, 3))
+        # print(convert_long_to_short(choice))
         # print(choice)
-        g.operate(player=3, op=choice)
-        # g.display()
+        board = operate(board, player=3, op=choice)
+        # display(board)
     b = time.time()
-    g.display()
+    display(board)
     print(b - a)
