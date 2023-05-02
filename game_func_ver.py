@@ -31,3 +31,6 @@ def judge(board):
 
 def available_op(board, player, test=False):
     return game.Game(board).available_op(player, test)
+
+def display(board):
+    game.Game(board).display()
