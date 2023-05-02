@@ -90,9 +90,9 @@ def operate(board, player: int, op: tuple) -> list:
     if amount == 1 or not (move_dir in {dir, dir + 1}):  # 单个走或者平移 # 寒假末在这里加了一个not，应该是最早的时候漏掉了
         try:
             for i in range(amount):
-                if b[op[i * 2 + 1] + op[0][0]][op[i * 2 + 2] + op[0][1]] == 1:
-                    b[op[i * 2 + 1] + op[0][0]][op[i * 2 + 2] + op[0][1]] = player
-                    b[op[i * 2 + 1]][op[i * 2 + 2]] = 1
+                if board[op[i * 2 + 1] + op[0][0]][op[i * 2 + 2] + op[0][1]] == 1:
+                    board[op[i * 2 + 1] + op[0][0]][op[i * 2 + 2] + op[0][1]] = player
+                    board[op[i * 2 + 1]][op[i * 2 + 2]] = 1
                 else:
                     raise CannotGo
         except IndexError:
