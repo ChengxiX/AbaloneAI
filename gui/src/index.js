@@ -1,4 +1,7 @@
 import {BitmapText,Container,Sprite,utils,loader, Application, Graphics, Text, TextStyle,Rectangle, DisplayObject, autoDetectRenderer} from 'pixi.js';
+import axios from "axios"
+
+axios.defaults.baseURL = 'https://api.example.com'
 
 
 const TEXT_STYLE = new TextStyle({
@@ -19,6 +22,8 @@ const app = new Application({
      resolution:2,
 });
 document.body.appendChild(app.view);
+
+axios
 
 
 
@@ -125,10 +130,13 @@ function displayStones(board){
                     case 3: // white
                          stones.push(setWhiteStone(40+j*35+(5-i)*17.5,50+i*30,i,j))
                          break;
-
                }
           }
      }
+}
+
+function operate(){
+
 }
 
 displayStones(board);

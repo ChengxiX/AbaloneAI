@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "pixi.min.js",
   "dependencies": {
+    "axios": "^1.4.0",
     "earcut": "^2.2.4",
     "eventemitter3": "^3.1.2",
     "object-assign": "^4.1.1",
@@ -22,6 +23,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {},
   "description": ""
 }
