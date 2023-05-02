@@ -38,11 +38,11 @@ class InvalidDirection(InvalidOperation): pass
 
 
 class Game:
-    def __init__(self):
-        self.board = [[3, 3, 3, 3, 3, 0, 0, 0, 0], [3, 3, 3, 3, 3, 3, 0, 0, 0], [1, 1, 3, 3, 3, 1, 1, 0, 0],
+    def __init__(self, board: list=None, dead: list=None):
+        self.board = board or [[3, 3, 3, 3, 3, 0, 0, 0, 0], [3, 3, 3, 3, 3, 3, 0, 0, 0], [1, 1, 3, 3, 3, 1, 1, 0, 0],
                       [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
                       [0, 0, 1, 1, 2, 2, 2, 1, 1], [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
-        self.dead = []
+        self.dead = dead or []
 
     def test_move(self, player, op):
         self.validate(player, op, True)
@@ -269,7 +269,6 @@ class Game:
             return 1
 
     def available_op(self, player, test=False):
-        # 测试时list_type修改append方法
         enemy = 2 if player == 3 else 3
         result = []
         for i in range(9):
