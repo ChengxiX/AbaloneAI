@@ -22,9 +22,8 @@ const app = new Application({
      resolution:2,
 });
 document.body.appendChild(app.view);
-
-axios
-
+let game_id
+axios.post('/new_game', {player: 2}).then((response)=>{game_id = response.data})
 
 
 
