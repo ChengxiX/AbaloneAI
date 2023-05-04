@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
-import game
 import math
 
+
+# 以下所有训练假设己方是黑棋(2|下方)
 
 class MCTS:
     "Monte Carlo tree searcher. First rollout the tree then choose a move."
@@ -91,9 +92,18 @@ class MCTS:
         return max(self.children[node], key=uct)
 
 
-class Node(game.Game):
-    def __init__(self, board):
+import game
+import random
+
+
+class Node(ABC):
+    def __init__(self, board=None, start_player=3):
+        if board is None:
+            board = [[3, 3, 3, 3, 3, 0, 0, 0, 0], [3, 3, 3, 3, 3, 3, 0, 0, 0], [1, 1, 3, 3, 3, 1, 1, 0, 0],
+                     [1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1, 1, 1],
+                     [0, 0, 1, 1, 2, 2, 2, 1, 1], [0, 0, 0, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 2, 2, 2, 2, 2]]
         self.board = board
+        self.player = start_player
 
     """
     A representation of a single board state.
@@ -104,26 +114,39 @@ class Node(game.Game):
     @abstractmethod
     def find_children(self):
         # 所有孩子
-        "All possible successors of this board state"
-        return self.board
+        children = []
+        available_op = game.available_op(self.board, self.player)
+        for op in available_op:
+            children.append(game.operate(self.board, self.player, op))
+        return children
 
     @abstractmethod
     def find_random_child(self):
-        #随机孩子
-        "Random successor of this board state (for more efficient simulation)"
-        return None
+        # 随机孩子
+        available_op = game.available_op(self.board, self.player)
+        op = random.choice(available_op)
+        child = game.operate(self.board, self.player, op)
+        return child
 
     @abstractmethod
     def is_terminal(self):
-        #是否无孩子
-        "Returns True if the node has no children"
-        return True
+        # 是否无孩子
+        if game.judge(self.board) != 1 or game.available_op(self.board, self.player) == 0:
+            return True
+        else:
+            return False
 
     @abstractmethod
     def reward(self):
-        #是否赢了
-        "Assumes `self` is terminal node. 1=win, 0=loss, .5=tie, etc"
-        return 0
+        # 是否赢了
+        result = game.judge(self.board)
+        if result == 2:
+            return 1
+        elif result == 3:
+            return 0
+        else:
+            print("Error with reward")
+            return 0.5
 
     @abstractmethod
     def __hash__(self):
